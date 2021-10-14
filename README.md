@@ -1,2 +1,2 @@
 # gender-inklusive-nmt
-Gender-inklusive nmt system for German and Frenche
+Gender-inklusive nmt system for German and French
