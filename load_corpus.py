@@ -26,7 +26,7 @@ def write_dataset_to_file(dirname: str, url: str):
 
 
 if __name__ == "__main__":
-    #write_dataset_to_file(dirname=DIR, url=r"https://www.statmt.org/europarl/v7/de-en.tgz")
+    write_dataset_to_file(dirname=DIR, url=r"https://www.statmt.org/europarl/v7/de-en.tgz")
     write_dataset_to_file(dirname=DIR, url=r"https://www.statmt.org/europarl/v7/fr-en.tgz")
     for file in DIR.iterdir():
         if str(file).endswith(".en"):
