@@ -24,6 +24,14 @@ def write_dataset_to_file(dirname: str, url: str):
     file = tarfile.open(fileobj=response.raw, mode="r|gz")
     file.extractall(path=dirname)
 
+# we could also use the single language corpus
+# it contains more data
+# but we'd have to construct it ourselves given all the source files...
+#     response = requests.get(r"https://www.statmt.org/europarl/v7/europarl.tgz", stream=True)
+#     file = tarfile.open(fileobj=response.raw, mode="r|gz")
+#     for member in file.getmembers():
+        # just select files from required language
+
 
 if __name__ == "__main__":
     write_dataset_to_file(dirname=DIR, url=r"https://www.statmt.org/europarl/v7/de-en.tgz")
