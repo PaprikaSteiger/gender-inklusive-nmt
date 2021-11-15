@@ -5,7 +5,7 @@ from pathlib import Path
 import requests
 import tarfile
 
-DIR: Path = (Path(__file__).parent / "datasets").mkdir(exist_ok=True) or Path(__file__).parent / "datasets"
+DIR: Path = (Path(__file__).parent / "data").mkdir(exist_ok=True) or Path(__file__).parent / "data"
 
 
 # TODO: Seemingly, the hugging face interface throws an error
