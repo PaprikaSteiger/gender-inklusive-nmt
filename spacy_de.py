@@ -7,6 +7,8 @@ from spacy.tokens import Doc, Span
 from spacy.tokens import Token
 from load_corpus import DIR
 
+from replace_functions import replace_article, replace_adjective, replace_noun, get_declination_type
+
 # list of all pos taggs, dependencies etc
 # https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
 # important linguistic features
@@ -31,137 +33,54 @@ from load_corpus import DIR
 # customize spacy Token slightly to have attribute vor replaced text
 Token.set_extension("value", default="")
 
-# important replacements
-replacements = {
-    "er": "er:in",
-    "er_pl": "er:innen",
-}
+# important noun endings
+noun_lemma_endings = [
+    "er", "in",
+    "ent", "entin",
+    "at", "atin",
+    "te", "tin",
+    "or", "orin",
+    "eur", "euse", "eurin",
+    "tekt", "tektin",
+    "ender", "ende",
+    "se", "sin" # Virtuose, are there other words with ending e - in?
+    # yes, der Kriminelle, die Kriminelle, but it's invariant...
+    # TODO: what to do with ein KriminelleR, but der KriminellE, it follows the strong, mixed, weak declination pattern
+
+
+
+
+]
+# tokens where gender inclusive shall not be used
+no_replacment = [
+    "Mann",
+    "Frau",
+    "Mutter",
+    "Vater",
+    "Computer",
+]
+
+special_nouns = [
+    "Freund", "Freundin",
+    "Arzt", "Ärztin",
+    "Frisör", # "Friseurin",
+
+
+]
 # special words
 pronouns = {
     # jeder
 }
-# Artikel
 
-def replace_articel(article: spacy.tokens.Token, gender_token=":"):
-    morph = article.morph
-    if "Number=Plur" in morph:
-        return None
-    if "Definite=Ind" in morph:
-        if "Case=Nom" in morph:
-            if "Gender=Fem" in morph:
-                article._.value = article.text[:-1] + f"{gender_token}e"
-            elif "Gender=Masc" in morph:
-                article._.value = article.text + f"{gender_token}e"
-        elif "Case=Gen" in morph:
-            if "Gender=Fem" in morph:
-                article._.value = article.text + f"{gender_token}s"
-            elif "Gender=Masc" in morph:
-                article._.value = article.text[:-1] + f"r{gender_token}s"
-        elif "Case=Dat" in morph:
-            if "Gender=Fem" in morph:
-                article._.value = article.text + f"{gender_token}m"
-            elif "Gender=Masc" in morph:
-                article._.value = article.text[:-1] + f"r{gender_token}m"
-        elif "Case=Acc" in morph:
-            if "Gender=Fem" in morph:
-                article._.value = article.text + f"{gender_token}n"
-            elif "Gender=Masc" in morph:
-                article._.value = article.text[:-1] + f"r{gender_token}n"
-    else:
-        if "Case=Nom" in morph:
-            if "Gender=Fem" in morph:
-                article._.value = article.text + f"{gender_token}der"
-            elif "Gender=Masc" in morph:
-                article._.value = f"die{gender_token}" + article.text
-        elif "Case=Gen" in morph:
-            if "Gender=Fem" in morph:
-                article._.value = article.text + f"{gender_token}des"
-            elif "Gender=Masc" in morph:
-                article._.value = f"der{gender_token}" + article.text
-        elif "Case=Dat" in morph:
-            if "Gender=Fem" in morph:
-                article._.value = article.text + f"{gender_token}dem"
-            elif "Gender=Masc" in morph:
-                article._.value = f"der{gender_token}" + article.text
-        elif "Case=Acc" in morph:
-            if "Gender=Fem" in morph:
-                article._.value = article.text + f"{gender_token}den"
-            elif "Gender=Masc" in morph:
-                article._.value = f"die{gender_token}" + article.text
+special_cases = [
+    "kein", # mixed declination, not weak one
 
 
-def get_declination_type(determiner: spacy.tokens.Token):
-    # TODO do for other than Art:
-    tag = determiner.tag_
-    morph = determiner.morph
-    if tag == "ART":
-        if "Definite=Ind" in morph:
-            return "mixed"
-        else:
-            return "weak"
+]
 
-
-def replace_adjective(adjective: spacy.tokens.Token, declination_type: str, gender_token=":"):
-    morph = adjective.morph
-    if "Number=Plur" in morph or declination_type=="weak":
-        return None
-    if declination_type=="strong":
-        if "Case=Nom" in morph:
-            if "Gender=Fem" in morph:
-                adjective._.value = adjective.text + f"{gender_token}r"
-            elif "Gender=Masc" in morph:
-                adjective._.value = adjective.text[:-1] + f"{gender_token}r"
-        elif "Case=Gen" in morph:
-            if "Gender=Fem" in morph:
-                adjective._.value = adjective.text + f"{gender_token}n"
-            elif "Gender=Masc" in morph:
-                adjective._.value = adjective.text[:-1] + f"r{gender_token}n"
-        elif "Case=Dat" in morph:
-            if "Gender=Fem" in morph:
-                adjective._.value = adjective.text + f"{gender_token}m"
-            elif "Gender=Masc" in morph:
-                adjective._.value = adjective.text[:-1] + f"r{gender_token}m"
-        elif "Case=Acc" in morph:
-            if "Gender=Fem" in morph:
-                adjective._.value = adjective.text + f"{gender_token}n"
-            elif "Gender=Masc" in morph:
-                adjective._.value = adjective.text[:-1] + f"r{gender_token}n"
-
-    elif declination_type=="mixed":
-        if "Case=Nom" in morph:
-            if "Gender=Fem" in morph:
-                adjective._.value = adjective.text + f"{gender_token}r"
-            elif "Gender=Masc" in morph:
-                adjective._.value = adjective.text[:-1] + f"{gender_token}r"
-
-
-def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
-    # check the ending
-    # er
-    # male nouns in er
-    if noun.lemma_.endswith("er") and "Gender=Masc" in noun.morph:
-        if "Number=Plur" in noun.morph:
-            if "Case=Dat" in noun.morph:
-                noun._.value = f"ern{gender_token}innen".join(noun.text.rsplit("er", 1))
-            else:
-                noun._.value = f"er{gender_token}innen".join(noun.text.rsplit("er", 1))
-        else:
-            if "Case=Gen" in noun.morph:
-                noun._.value = f"ers{gender_token}in".join(noun.text.rsplit("er", 1))
-            else:
-                noun._.value = f"er{gender_token}in".join(noun.text.rsplit("er", 1))
-    # female nouns in in
-    if noun.lemma_.endswith("in") and "Gender=Fem" in noun.morph:
-        if "Number=Plur" in noun.morph:
-            if "Case=Dat" in noun.morph:
-                noun._.value = f"ern{gender_token}innen".join(noun.text.rsplit("in", 1))
-            else:
-                noun._.value = f"er{gender_token}innen".join(noun.text.rsplit("in", 1))
-        else:
-            if "Case=Gen" in noun.morph:
-                noun._.value = f"ers{gender_token}in".join(noun.text.rsplit("in", 1))
-            else:
-                noun._.value = f"er{gender_token}in".join(noun.text.rsplit("in", 1))
+replacements = {
+    "jedermann": "jeder", # shall be replaced bei jeder
+}
 
 
 def on_match_ar_ad_nn(
@@ -175,21 +94,25 @@ def on_match_ar_ad_nn(
     # get the matched tokens
     match_id, start, end = matches[i]
     entities = [t for t in Span(doc, start, end, label="EVENT")]
-    # TODO decide given the noun wether to replace anything or not
 
-    if len(entities) == 2:
-        article = entities.pop(0)
-        noun = entities.pop(-1)
+    article = entities.pop(0)
+    noun = entities.pop(-1)
+    # TODO decide given the noun whether to replace anything or not
+    # Check endings of lemma
+    # check the noun if something has to be replaced
+    if not any(noun.lemma_.endswith(ending) for ending in noun_lemma_endings):
+        return None
+    # no adjective or adverb
+    if len(entities) == 0:
         replace_noun(noun=noun, gender_token=gender_token)
-        replace_articel(article=article, gender_token=gender_token)
+        replace_article(article=article, gender_token=gender_token)
     else:
-        # TODO: distinguish adjectives and adverbs/partikles
-        article = entities.pop(0)
-        noun = entities.pop(-1)
-        adjectives = entities
+        # TODO: distinguish adjectives and adverbs/partikel
+        adjectives = [t for t in entities if t.tag_ == "ADJA"]
+        # adverbs are invariant in German, so just replace the adjectives
         declination_type = get_declination_type(determiner=article)
         replace_noun(noun=noun, gender_token=gender_token)
-        replace_articel(article=article, gender_token=gender_token)
+        replace_article(article=article, gender_token=gender_token)
         for adjective in adjectives:
             replace_adjective(adjective=adjective, declination_type=declination_type, gender_token=gender_token)
 
@@ -215,6 +138,7 @@ if __name__ == "__main__":
             print(line)
             doc = nlp(line)
             matches = matcher(doc)
+            print(matches)
             text = " ".join(t._.value or t.text for t in doc)
             print(text)
             breakpoint()
@@ -251,8 +175,7 @@ if __name__ == "__main__":
 # possesive pronoun, third person
 
 
-# tokens where gender inclusive shall not be used
-# {"Mann", "Frau", "Mutter", "Vater"
+
 # typical noun endings refering to persons, male
 # {"er", "or", "ent", "tekt", "eur",
 
