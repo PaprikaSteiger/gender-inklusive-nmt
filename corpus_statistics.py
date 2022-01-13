@@ -8,7 +8,8 @@ import csv
 
 from load_corpus import DIR
 
-TOKENIZED = DIR / "tokenized_normalized_truecased.de"
+TOKENIZED_de = DIR / "tokenized_normalized_truecased.de"
+tokenized_fr = DIR / "tokenized_normalized_truecased.fr"
 
 
 def count_words(in_file: Path):
@@ -30,7 +31,8 @@ def histogram_of_frequencies(data: list):
 # write small bash script
 
 if __name__ == "__main__":
-    counter = count_words(in_file=(DIR / "tokenized_normalized_truecased.de"))
+    counter_de = count_words(in_file=(DIR / "tokenized_normalized_truecased.de"))
+    counter_fr = count_words(in_file=(DIR / "tokenized_normalized_truecased.fr"))
     histogram_of_frequencies(data=list(counter.values()))
     # write counts to file
     with (DIR / "word_count.csv").open("w", encoding="utf8", newline="") as out:
@@ -41,3 +43,5 @@ if __name__ == "__main__":
     n = 100
     for ele in counter.most_common()[:n-1:-1]:
         print(ele)
+
+    # distinguish french word count
