@@ -20,6 +20,18 @@ def preprocess_german_corpus(in_file: Path, out_file: Path, truecaser_path: Path
             line = str(i) + "\t" + line + "\n"
             out.write(line)
 
+def preprocess_french_corpus(in_file: Path, out_file: Path, truecaser_path: Path):
+    with open(in_file, encoding="utf8") as inn, open(out_file, "w", encoding="utf8") as out:
+        mnorm_fr = MosesPunctNormalizer(lang="fr")
+        mtok_fr = MosesTokenize(lang="fr")
+        mtrue_fr = train_truecase(truecaser_path=truecaser_path, training_corpus=in_file)
+
+        for j, sent in enumerate(inn, start=1):
+            sent = mnorm_fr.normalize(line)
+            sent = mtok_fr.tokenize(sent, return_str=True)
+            sent = mtrue_fr.truecase(sent, return_str=True)
+            sent = str(j) + "\t" + sent + "\n"
+            out.write(sent)
 
 # although I used a generator to iterate over all sentences while training the truecaser, I ran into a memory error
 # after 1'254'149 sentences
@@ -53,5 +65,10 @@ if __name__ == "__main__":
         in_file=(DIR / "europarl-v7.de-en.de"),
         out_file=(DIR / "tokenized_normalized_truecased.de"),
         truecaser_path=(DIR / "german.truecase")
+    )
+    preprocess_french_corpus(
+        in_file = (DIR / "europarl-v7.fr-en.fr"),
+        out_file = (DIR / "tokenized_normalized_truecased.fr"),
+        truecaser_path = (DIR / "french.truecase")
     )
 
