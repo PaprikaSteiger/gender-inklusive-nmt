@@ -57,6 +57,10 @@ def replace_article(article: spacy.tokens.Token, gender_token=":"):
                 article._.value = f"die{gender_token}" + text
 
 
+# weak declination if
+# ["derselbe", "dieser", "jeder", "jener", "mancher", "welcher", "der", "die", "das", "alle", "sämtliche", "beide"
+# mixed if
+#
 def get_declination_type(determiner: spacy.tokens.Token):
     # TODO do for other than Art:
     tag = determiner.tag_
@@ -127,10 +131,10 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
                     noun._.value = f"er{gender_token}innen".join(text.rsplit("er", 1))
             else:
                 if "Case=Gen" in morph:
-                    noun._.value = f"ers{gender_token}in".join(text.rsplit("er", 1))
+                    noun._.value = f"ers{gender_token}in".join(text.rsplit("ers", 1))
                 else:
                     noun._.value = f"er{gender_token}in".join(text.rsplit("er", 1))
-        # female nouns in in
+        # female nouns in in erin
         if "Gender=Fem" in morph:
             if "Number=Plur" in morph:
                 if "Case=Dat" in morph:
@@ -165,42 +169,42 @@ def replace_personal_pronoun(pronoun: spacy.tokens.Token, gender_token=":"):
     if "Case=Nom" in morph:
         if "Gender=Fem" in morph:
             if text[0].isupper():
-                pronoun._.value = text + f"{gender_token}:Er"
+                pronoun._.value = text + f"{gender_token}Er"
             else:
-                pronoun._.value = text + f"{gender_token}:er"
+                pronoun._.value = text + f"{gender_token}er"
         elif "Gender=Masc" in morph:
             if text[0].isupper():
-                pronoun._.value = f"Sie{gender_token}:" + text
+                pronoun._.value = f"Sie{gender_token}" + text
             else:
-                pronoun._.value = f"sie{gender_token}:" + text
+                pronoun._.value = f"sie{gender_token}" + text
     elif "Case=Gen" in morph:
         if "Gender=Fem" in morph:
             if text[0].isupper():
-                pronoun._.value = text + f"{gender_token}:Seiner"
+                pronoun._.value = text + f"{gender_token}Seiner"
             else:
-                pronoun._.value = text + f"{gender_token}:seiner"
+                pronoun._.value = text + f"{gender_token}seiner"
         elif "Gender=Masc" in morph:
             if text[0].isupper():
-                pronoun._.value = f"Ihrer{gender_token}:" + text
+                pronoun._.value = f"Ihrer{gender_token}" + text
             else:
-                pronoun._.value = f"ihrer{gender_token}:" + text
+                pronoun._.value = f"ihrer{gender_token}" + text
     elif "Case=Dat" in morph:
         if "Gender=Fem" in morph:
-            pronoun._.value = text + f"{gender_token}:m"
+            pronoun._.value = text + f"{gender_token}m"
         elif "Gender=Masc" in morph:
             if text[0].isupper():
-                pronoun._.value = f"Ihr{gender_token}:m"
+                pronoun._.value = f"Ihr{gender_token}m"
             else:
-                pronoun._.value = f"ihr{gender_token}:m"
+                pronoun._.value = f"ihr{gender_token}m"
     elif "Case=Acc" in morph:
         if "Gender=Fem" in morph:
             if text[0].isupper():
-                pronoun._.value = text + f"{gender_token}:Ihn"
+                pronoun._.value = text + f"{gender_token}Ihn"
             else:
-                pronoun._.value = text + f"{gender_token}:ihn"
+                pronoun._.value = text + f"{gender_token}ihn"
         elif "Gender=Masc" in morph:
             if text[0].isupper():
-                pronoun._.value = f"Sie{gender_token}:" + text
+                pronoun._.value = f"Sie{gender_token}" + text
             else:
-                pronoun._.value = f"sie{gender_token}:" + text
+                pronoun._.value = f"sie{gender_token}" + text
 
