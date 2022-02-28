@@ -6,6 +6,10 @@ from sacremoses import MosesTokenizer, MosesPunctNormalizer, MosesTruecaser
 SENT_MIN: int = 5
 SENT_MAX: int = 30
 
+CORPUS_NOISE = [
+    r"http://",
+    
+]
 
 def preprocess_german_corpus(in_file: Path, out_file: Path, truecaser_path: Path):
     with open(in_file, encoding="utf8") as inn, open(out_file, "w", encoding="utf8") as out:

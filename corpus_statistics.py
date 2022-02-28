@@ -27,8 +27,6 @@ def histogram_of_frequencies(data: list):
     sn.histplot(array, stat="count", bins=bins, )
     plt.show()
 
-# use https://github.com/rsennrich/ParZu for parsing
-# write small bash script
 
 if __name__ == "__main__":
     counter_de = count_words(in_file=(DIR / "tokenized_normalized_truecased.de"))
