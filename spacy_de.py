@@ -54,6 +54,7 @@ noun_lemma_endings = [
 # tokens where gender inclusive shall not be used
 no_replacment = [
     "Mann",
+    "Herr",
     "Frau",
     "Mutter",
     "Vater",
@@ -79,6 +80,7 @@ no_replacment = [
     #"Boomer", TODO: ask an expert?
     #"Barde", TODO: ask an expert?
     "Meter",
+    "Kilometer",
     "Wasser",
     "Muster",
     "Opfer",
@@ -88,6 +90,16 @@ no_replacment = [
     "Oktober",
     "November",
     "Dezember",
+    "Mauer",
+    "Wasser",
+    "Gletscher",
+    "Wunder",
+    "Fenster",
+    "Gelder",
+    "Gelächter",
+    "Becher",
+
+
 
 
 
@@ -118,6 +130,8 @@ special_cases = [
 
 replacements = {
     "jedermann": "jeder", # shall be replaced bei jeder
+    "Wunderknabe": "Wunderkind",
+
 }
 
 
