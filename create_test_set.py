@@ -24,8 +24,17 @@ def select_sentences(n: int, file: str):
             clean_lines.append(line)
     length = len(clean_lines)
     # generate n random intengers in range (0, length)
+    # TODO: assert no integer appears twice
+    # TODO: or replace dupplicated sentences afterwards
     indices = np.random.randint(0, length, n)
-    for i in indices:
+    indices_set = set(indices)
+    while not len(indices_set) == len(indices):
+        breakpoint()
+        new_int = np.random.randint(0, length)
+        if new_int not in indices_set:
+            indices_set.add(new_int)
+
+    for i in indices_set:
         yield clean_lines[i]
 
 
@@ -51,12 +60,14 @@ def spacy_statistics_of_test_set(test_set: str, spacy_model: Language):
             length[len(doc)] += 1
             for t in doc:
                 pos[str(t.pos_)] += 1
-                print(str(t.morph))
-                breakpoint()
-                morph[str(t.morph)] += 1
+                if "Person" in str(t.morph) and "Pron" in str(t.morph):
+                    match = re.match(r".+\|(Person.+?\|Pron.+?)(:?\|.+|$)", str(t.morph)).group(1)
+                    morph[match] += 1
+                else:
+                    morph["NoPron"] += 1
 
     plt.bar(x=length.keys(), height=length.values())
-    plt.xticks( labels=length.keys(), rotation=90)
+    plt.xticks(ticks=range(len(length.keys())), labels=length.keys(), rotation=90)
     plt.show()
 
     plt.bar(x=pos.keys(), height=pos.values())
@@ -67,10 +78,8 @@ def spacy_statistics_of_test_set(test_set: str, spacy_model: Language):
     plt.xticks(ticks=range(len(gendered.keys())), labels=gendered.keys(), rotation=90)
     plt.show()
 
-    # split morph into two plots
-
     plt.bar(x=morph.keys(), height=morph.values())
-    plt.xticks(ticks=range(len(morph.keys())), labels=morph.keys(), rotation=90)
+    plt.xticks(ticks=range(len(morph.keys())), labels=morph.keys(), rotation=45)
     plt.show()
 
     return pos, morph, length
@@ -85,7 +94,8 @@ if __name__ == "__main__":
     #     ],
     #     out_file=str(DIR / "test_set_de.txt")
     # )
-    spacy_statistics_of_test_set(
-        test_set=str(DIR / "test_set_de_backup.txt"),
-        spacy_model=spacy.load("de_core_news_lg")
-    )
+    # spacy_statistics_of_test_set(
+    #     test_set=str(DIR / "test_set_de.txt"),
+    #     spacy_model=spacy.load("de_core_news_lg")
+    # )
+

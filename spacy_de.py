@@ -47,7 +47,7 @@ noun_lemma_endings = [
     "se", "sin" # Virtuose, are there other words with ending e - in?
     # TODO: what to do with ein KriminelleR, but der KriminellE, it follows the strong, mixed, weak declination pattern
     # TODO: adjectives/pronouns used as noun follow adjective declination e.g. Kriminelle / Dritte vs. ein KriminellEr
-
+    # TODO: for all adjectives used as noun, e.g. also ein ErwachseneR der Erwachsene
 
 
 ]
@@ -58,18 +58,56 @@ no_replacment = [
     "Mutter",
     "Vater",
     "Computer",
+    "Roboter",
+    "Eimer", #And komposita
+    "Fühler",
+    "Körper",
+    "Gottesanbeterin",
+    "Völker", # shouldn't happen anyway as the lemma is volk
+    "Fehler",
+    "Hunger",
+    "20er", #TODO: in general numbers+er
+    "Leiter", # only if die Leiter
+    "Butter",
+    "Papier",
+    "Scanner",
+    "Fieber",
+    "Gelächter",
+    "Acker",
+    #"Wikinger", TODO: ask an expert? For me it's referring to a population/culture not just the male ones
+    #"Bürger", TODO: ask an expert?
+    #"Boomer", TODO: ask an expert?
+    #"Barde", TODO: ask an expert?
+    "Meter",
+    "Wasser",
+    "Muster",
+    "Opfer",
+    "Lager",
+    "Charakter",
+    "September",
+    "Oktober",
+    "November",
+    "Dezember",
+
+
+
+
+
+
 ]
 
 special_nouns = [
     "Freund", "Freundin",
     "Arzt", "Ärztin",
     "Frisör", # "Friseurin",
+    "Chirurg", "Chirurgin"
 
 
 ]
 # special words
 pronouns = {
     # jeder
+    # jedermann
 }
 
 special_cases = [
