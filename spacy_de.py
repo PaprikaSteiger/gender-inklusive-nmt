@@ -99,13 +99,6 @@ no_replacment = [
     "Gelächter",
     "Becher",
 
-
-
-
-
-
-
-
 ]
 
 special_nouns = [
