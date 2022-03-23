@@ -9,6 +9,7 @@ from load_corpus import DIR
 
 from replace_functions import replace_article, replace_adjective, \
     replace_noun, get_declination_type, replace_personal_pronoun
+from special_cases_de import gendered_no_replacement, noun_lemma_endings
 
 # list of all pos taggs, dependencies etc
 # https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
@@ -34,81 +35,6 @@ from replace_functions import replace_article, replace_adjective, \
 # customize spacy Token slightly to have attribute vor replaced text
 Token.set_extension("value", default="")
 
-# important noun endings
-noun_lemma_endings = [
-    "er", "in",
-    "ent", "entin",
-    "at", "atin",
-    "te", "tin",
-    "or", "orin",
-    "eur", "euse", "eurin",
-    "tekt", "tektin",
-    "ender", "ende",
-    "se", "sin" # Virtuose, are there other words with ending e - in?
-    # TODO: what to do with ein KriminelleR, but der KriminellE, it follows the strong, mixed, weak declination pattern
-    # TODO: adjectives/pronouns used as noun follow adjective declination e.g. Kriminelle / Dritte vs. ein KriminellEr
-    # TODO: for all adjectives used as noun, e.g. also ein ErwachseneR der Erwachsene
-
-
-]
-# tokens where gender inclusive shall not be used
-no_replacment = [
-    "Mann",
-    "Herr",
-    "Frau",
-    "Mutter",
-    "Vater",
-    "Computer",
-    "Roboter",
-    "Eimer", #And komposita
-    "Fühler",
-    "Körper",
-    "Gottesanbeterin",
-    "Völker", # shouldn't happen anyway as the lemma is volk
-    "Fehler",
-    "Hunger",
-    "20er", #TODO: in general numbers+er
-    "Leiter", # only if die Leiter
-    "Butter",
-    "Papier",
-    "Scanner",
-    "Fieber",
-    "Gelächter",
-    "Acker",
-    #"Wikinger", TODO: ask an expert? For me it's referring to a population/culture not just the male ones
-    #"Bürger", TODO: ask an expert?
-    #"Boomer", TODO: ask an expert?
-    #"Barde", TODO: ask an expert?
-    "Meter",
-    "Kilometer",
-    "Wasser",
-    "Muster",
-    "Opfer",
-    "Lager",
-    "Charakter",
-    "September",
-    "Oktober",
-    "November",
-    "Dezember",
-    "Mauer",
-    "Wasser",
-    "Gletscher",
-    "Wunder",
-    "Fenster",
-    "Gelder",
-    "Gelächter",
-    "Becher",
-
-]
-
-special_nouns = [
-    "Freund", "Freundin",
-    "Arzt", "Ärztin",
-    "Frisör", # "Friseurin",
-    "Chirurg", "Chirurgin"
-
-
-]
 # special words
 pronouns = {
     # jeder
@@ -121,19 +47,12 @@ special_cases = [
 
 ]
 
-replacements = {
-    "jedermann": "jeder", # shall be replaced bei jeder
-    "Wunderknabe": "Wunderkind",
-
-}
-
 
 def on_match_ar_ad_nn(
         matcher: spacy.matcher.Matcher,
         doc: spacy.tokens.Doc,
         i: int,
         matches: t.List[t.Tuple],
-        replacements: t.Dict[str, str]=replacements,
         gender_token: str=":",
 ) -> None:
     # get the matched tokens
@@ -145,24 +64,22 @@ def on_match_ar_ad_nn(
     # TODO decide given the noun whether to replace anything or not -> or is this a job for the replace noun function?
     # Check endings of lemma
     # check the noun if something has to be replaced
+    if noun.lemma_ in gendered_no_replacement:
+        return
     # todo: move this part to the replace noun function, so I might check the noun of a match if it was change and decide based on that if the rest has to be changed or not
     if not any(noun.lemma_.endswith(ending) for ending in noun_lemma_endings):
         return None
     # no adjective or adverb
     if len(entities) == 0:
-        replace_noun(noun=noun, gender_token=gender_token)
-        # check that ._.-value contains gender token
-        if gender_token in noun._.value:
+        if replace_noun(noun=noun, gender_token=gender_token):
             replace_article(article=article, gender_token=gender_token)
     else:
         # adverbs are invariant in German, so just replace the adjectives
         # also ignore cunjunctions and punctuation
         adjectives = [t for t in entities if t.tag_ == "ADJA"]
 
-        declination_type = get_declination_type(determiner=article)
-        replace_noun(noun=noun, gender_token=gender_token)
-        # check that ._.-value contains gender token
-        if gender_token in noun._.value:
+        if replace_noun(noun=noun, gender_token=gender_token):
+            declination_type = get_declination_type(determiner=article)
             replace_article(article=article, gender_token=gender_token)
             for adjective in adjectives:
                 replace_adjective(adjective=adjective, declination_type=declination_type, gender_token=gender_token)
@@ -187,7 +104,7 @@ def on_match_pp(
     replace_personal_pronoun(pronoun=pronoun, gender_token=gender_token)
 
 
-def on_match_ip_dp_at_nn(
+def on_match_ip_dp_nn(
         matcher: spacy.matcher.Matcher,
         doc: spacy.tokens.Doc,
         i: int,
@@ -201,10 +118,9 @@ def on_match_ip_dp_at_nn(
     noun = entities.pop(0)
     # the pronoun follows (as it is used attributively without determiner) the strong declination of an adjective
     # only transform pronoun if transformation applied to noun
-    replace_noun(noun=noun, gender_token=gender_token)
-    # check that ._.-value contains gender token
-    if gender_token in noun._.value:
+    if replace_noun(noun=noun, gender_token=gender_token):
         replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
+        # TODO: replace pronouns
 
 
 def on_match_ad_nn(
@@ -212,7 +128,6 @@ def on_match_ad_nn(
         doc: spacy.tokens.Doc,
         i: int,
         matches: t.List[t.Tuple],
-        replacements: t.Dict[str, str]=replacements,
         gender_token: str=":",
 ) -> None:
     # get the matched tokens
@@ -226,19 +141,38 @@ def on_match_ad_nn(
     declination_type = "strong"
     if len(entities) == 1:
         adjective = entities[0]
-        replace_noun(noun=noun, gender_token=gender_token)
-        # check that ._.-value contains gender token
-        if gender_token in noun._.value:
+        if replace_noun(noun=noun, gender_token=gender_token):
             replace_adjective(adjective=adjective, declination_type=declination_type, gender_token=gender_token)
     else:
         # adverbs are invariant in German, so just replace the adjectives
         adjectives = [t for t in entities if t.tag_ == "ADJA"]
-
-        replace_noun(noun=noun, gender_token=gender_token)
-        # check that ._.-value contains gender token
-        if gender_token in noun._.value:
+        if replace_noun(noun=noun, gender_token=gender_token):
             for adjective in adjectives:
                 replace_adjective(adjective=adjective, declination_type=declination_type, gender_token=gender_token)
+
+def on_match_pp_ad_nn(
+        matcher: spacy.matcher.Matcher,
+        doc: spacy.tokens.Doc,
+        i: int,
+        matches: t.List[t.Tuple],
+        gender_token: str=":",
+) -> None:
+    pass
+
+
+def on_match_su_ip_dp(
+    matcher: spacy.matcher.Matcher,
+    doc: spacy.tokens.Doc,
+    i: int,
+    matches: t.List[t.Tuple],
+    gender_token: str=":",
+):
+    # get the matched tokens
+    match_id, start, end = matches[i]
+    entities = [t for t in Span(doc, start, end, label="EVENT")]
+    # first token is the not-determiner
+    pronoun = entities.pop(0)
+    replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
 
 
 def clean_annotated_file(infile: Path, outfile: Path):
@@ -298,14 +232,29 @@ if __name__ == "__main__":
     ]
 
     # noun phrase with attributive indefinite or demonstrative pronoun
-    ip_dp_at_nn = [
+    ip_dp_nn = [
         {"TAG": {"IN": ["PDAT", "PIAT"]}},
         {"POS": "NOUN"},
     ]
 
+    # noun phrase with attributive possessive pronoun and possible adjectives
+    pp_ad_nn = [
+        {"TAG": "PPOSAT"},
+        {"TAG": "ADJA", "OP": "*"},
+        {"Tag": "NOUN"}
+    ]
+
+    # isolated noun not preceded by any determiner or pronoun
+    nn_isolated = [
+        {"TAG": {"IN": ["PDS", "PIS"]}}
+    ]
     # personal pronoun, no entity in sentence, no object, not referring to a noun not describing a person
     pp = [
         {"TAG": "PPER", "MORPH": {"INTERSECTS": ["Number=Sing", "Gender=Masc", "Gender=Fem"]}}
+    ]
+    # substitution indefinite or demonstrative pronoun:
+    su_ip_dp = [
+        {"TAG": {"IN": ["PDS", "PIS"]}}
     ]
     # bool(doc.ents) == False or # pronoun doesn t refer to entity
     # possesive pronoun, third person
@@ -319,12 +268,13 @@ if __name__ == "__main__":
     nlp = spacy.load("de_core_news_lg")
     matcher = Matcher(nlp.vocab)
     matcher.add("ar_ad_nn", [ar_ad_nn], on_match=on_match_ar_ad_nn)
-    matcher.add("pp", [pp], on_match=on_match_pp)
-    matcher.add("id_dp_at_nn", [ip_dp_at_nn], on_match=on_match_ip_dp_at_nn)
+    #matcher.add("pp", [pp], on_match=on_match_pp)
+    matcher.add("id_dp_nn", [ip_dp_nn], on_match=on_match_ip_dp_nn)
     matcher.add("ad_nn", [ad_nn], on_match=on_match_ad_nn)
+    matcher.add("su_ip_dp", [su_ip_dp], on_match=on_match_su_ip_dp)
     infile = DIR / "german_annotated.txt"
     outfile = DIR / "german_annotated_inclusiv_spacy.txt"
-    clean_annotated_file(infile=(DIR / "german_annotated_inclusive.txt"), outfile=(DIR / "german_annotated_inclusive_clean.txt"))
+    #clean_annotated_file(infile=(DIR / "german_annotated_inclusive.txt"), outfile=(DIR / "german_annotated_inclusive_clean.txt"))
     with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
         for line in inn:
             print(line)
