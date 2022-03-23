@@ -3,22 +3,317 @@ import typing as t
 import spacy
 from spacy.tokens import Token
 
+# Pronoun
+def replace_pron(pron: spacy.tokens.Token, gender_token="·"):
+  morph = pron.morph
+  text = pron.text
+  # Pron personnels
+  if "Person=3" in morph: # il & elle
+    if "Number=Sing" in morph:
+      if "Gender=Masc" in morph:
+        pron._.value = text[:1] + f"{gender_token}el"
+      elif "Gender=Fem" in morph:
+        pron._.value = f"i{gender_token}" + text[:-3]
+    elif "Number=Plur" in morph: # ils & elles
+      if "Gender=Masc" in morph:
+        pron._.value = text[:1] + f"{gender_token}el{gender_token}s"
+      elif "Gender=Fem" in morph:
+        pron._.value = f"i{gender_token}" + text[:-3]+ f"{gender_token}s"
+
+  # Pron compléments
+  if "PronType=Prs" in morph: # lui & elle
+    if "Number=Sing" in morph:
+      if "Gender=Masc" in morph:
+        pron._.value = f"ell{gender_token}" + text[1:]
+      elif "Gender=Fem" in morph:
+        pron._.value = text[:-1] + f"{gender_token}ui"
+    elif "Number=Plur" in morph: # eux & elles
+      if "Gender=Masc" in morph:
+        pron._.value = f"ell{gender_token}" + text
+      elif "Gender=Fem" in morph:
+        pron._.value = text[:-3] + f"{gender_token}eux"
+
+# Noun
+def replace_noun(noun: spacy.tokens.Token, gender_token="·"):
+  morph = noun.morph
+  text = noun.text
+  lemma = noun.lemma_
+  # eau/elle Noun
+  if lemma.endswith("eau"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"elle{gender_token}au".join(text.rsplit("eau", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"elle{gender_token}au{gender_token}s".join(text.rsplit("eaux", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"elle{gender_token}au".join(text.rsplit("elle", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"elle{gender_token}au{gender_token}s".join(text.rsplit("elles", 1))
+
+  # el/elle Noun
+  if lemma.endswith("el"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"el{gender_token}le".join(text.rsplit("el", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"el{gender_token}le{gender_token}s".join(text.rsplit("els", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"el{gender_token}le".join(text.rsplit("elle", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"el{gender_token}le{gender_token}s".join(text.rsplit("elles", 1))
+
+  # eur/rice;euse;eure Noun
+  if lemma.endswith("eur"):
+    if "Gender=Fem" in morph:
+      if text.endswith("eur") or text.endswith("eurs"):
+        return None
+      if text.endswith("rice") or text.endswith("rices"):  # teur/trice and deur/drice Noun
+        if "Number=Sing" in morph:
+          noun._.value = f"eur{gender_token}rice".join(text.rsplit("rice", 1))
+        elif "Number=Plur" in morph:
+          noun._.value = f"eur{gender_token}rice{gender_token}s".join(text.rsplit("rices", 1))
+      elif text.endswith("euse") or text.endswith("euses"):  # eur/euse Noun
+        if "Number=Sing" in morph:
+          noun._.value = f"eur{gender_token}euse".join(text.rsplit("euse", 1))
+        elif "Number=Plur" in morph:
+          noun._.value = f"eur{gender_token}euse{gender_token}s".join(text.rsplit("euses", 1))
+      elif text.endswith("eure") or text.endswith("eures"):  # eur/eure Noun
+        if "Number=Sing" in morph:
+          noun._.value = f"eur{gender_token}e".join(text.rsplit("eure", 1))
+        elif "Number=Plur" in morph:
+          noun._.value = f"eur{gender_token}e{gender_token}s".join(text.rsplit("eures", 1))
+
+  # oux/ouse;ousse;ouce and eux/euse Noun
+  if lemma.endswith("oux") or lemma.endswith("eux"):
+    if "Gender=Fem" in morph:
+      if text.endswith("oux") or text.endswith("eux"):
+        return None
+      if text.endswith("ouse") or text.endswith("ouses"):
+        if "Number=Sing" in morph:
+          noun._.value = f"oux{gender_token}e".join(text.rsplit("ouse", 1))
+        elif "Number=Plur" in morph:
+          noun._.value = f"oux{gender_token}e{gender_token}s".join(text.rsplit("ouses", 1))
+      if text.endswith("ousse") or text.endswith("ousses"):
+        if "Number=Sing" in morph:
+          noun._.value = f"oux{gender_token}se".join(text.rsplit("ousse", 1))
+        elif "Number=Plur" in morph:
+          noun._.value = f"oux{gender_token}se{gender_token}s".join(text.rsplit("ousses", 1))
+      if text.endswith("ouce") or text.endswith("oucss"):
+        if "Number=Sing" in morph:
+          noun._.value = f"oux{gender_token}ce".join(text.rsplit("ouce", 1))
+        elif "Number=Plur" in morph:
+          noun._.value = f"oux{gender_token}ce{gender_token}s".join(text.rsplit("ouces", 1))
+      if text.endswith("euse") or text.endswith("euses"):
+        if "Number=Sing" in morph:
+          noun._.value = f"eux{gender_token}e".join(text.rsplit("euse", 1))
+        elif "Number=Plur" in morph:
+          noun._.value = f"eux{gender_token}e{gender_token}s".join(text.rsplit("euses", 1))
+
+  # s/se Noun
+  if lemma.endswith("s"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"{gender_token}xe".join(text.rsplit("s", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"{gender_token}xe{gender_token}s".join(text.rsplit("s", 1))
+    if "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"{gender_token}xe".join(text.rsplit("se", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"{gender_token}xe{gender_token}s".join(text.rsplit("ses", 1))
+
+  # tre/tresse Noun
+  if lemma.endswith("tre"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"tre{gender_token}xe".join(text.rsplit("tre", 1))
+      elif "Number=Plur":
+        noun._.value = f"tre{gender_token}xe{gender_token}s".join(text.rsplit("tres", 1))
+    if "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"tre{gender_token}xe".join(text.rsplit("tresse", 1))
+      elif "Number=Plur":
+        noun._.value = f"tre{gender_token}xe{gender_token}s".join(text.rsplit("tresses", 1))
+
+  # en/enne and ien/ienne Noun
+  if lemma.endswith("en"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"en{gender_token}ne".join(text.rsplit("en", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"en{gender_token}ne{gender_token}s".join(text.rsplit("ens", 1))
+    if "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"en{gender_token}ne".join(text.rsplit("enne", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"en{gender_token}ne{gender_token}s".join(text.rsplit("ennes", 1))
+
+  # er/ère and ier/ière Noun
+  if lemma.endswith("er"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"er{gender_token}ère".join(text.rsplit("er", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"er{gender_token}ère{gender_token}s".join(text.rsplit("ers", 1))
+    if "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"er{gender_token}ère".join(text.rsplit("ère", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"er{gender_token}ère{gender_token}s".join(text.rsplit("ères", 1))
+
+  # nt/nte and t/te Noun
+  if lemma.endswith("t"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"t{gender_token}e".join(text.rsplit("t", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"t{gender_token}e{gender_token}s".join(text.rsplit("ts", 1))
+    if "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"t{gender_token}e".join(text.rsplit("te", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"t{gender_token}e{gender_token}s".join(text.rsplit("tes", 1))
+
+  # nd/nde Noun
+  if lemma.endswith("nd"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"d{gender_token}e".join(text.rsplit("nd", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"d{gender_token}e{gender_token}s".join(text.rsplit("nds", 1))
+    if "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"d{gender_token}e".join(text.rsplit("nde", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"d{gender_token}e{gender_token}s".join(text.rsplit("ndes", 1))
+
+  # on/onne Noun
+  if lemma.endswith("on"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"on{gender_token}ne".join(text.rsplit("on", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"on{gender_token}ne{gender_token}".join(text.rsplit("ons", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"on{gender_token}ne".join(text.rsplit("onne", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"on{gender_token}ne{gender_token}s".join(text.rsplit("onnes", 1))
+
+  # u/ue Noun
+  if lemma.endswith("u"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"u{gender_token}e".join(text.rsplit("u", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"u{gender_token}e{gender_token}s".join(text.rsplit("us", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"u{gender_token}e".join(text.rsplit("ue", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"u{gender_token}e{gender_token}s".join(text.rsplit("ues", 1))
+
+  # é/ée Noun
+  if lemma.endswith("é"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"é{gender_token}e".join(text.rsplit("é", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"é{gender_token}e{gender_token}s".join(text.rsplit("és", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"é{gender_token}e".join(text.rsplit("ée", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"é{gender_token}e{gender_token}s".join(text.rsplit("ées", 1))
+
+  # i/ie Noun
+  if lemma.endswith("i"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"i{gender_token}e".join(text.rsplit("i", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"i{gender_token}e{gender_token}s".join(text.rsplit("is", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"i{gender_token}e".join(text.rsplit("ie", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"i{gender_token}e{gender_token}s".join(text.rsplit("ies", 1))
+
+  # al/ale Noun
+  if lemma.endswith("al"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"al{gender_token}e".join(text.rsplit("al", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"al{gender_token}e{gender_token}s".join(text.rsplit("aux", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"al{gender_token}e".join(text.rsplit("ale", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"al{gender_token}e{gender_token}s".join(text.rsplit("ales", 1))
+
+  # ef/effe Noun
+  if lemma.endswith("ef"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"ef{gender_token}fe".join(text.rsplit("ef", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"ef{gender_token}fe{gender_token}s".join(text.rsplit("efs", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"ef{gender_token}fe".join(text.rsplit("effe", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"ef{gender_token}fe{gender_token}s".join(text.rsplit("effes", 1))
+
+  # tif/tive Noun
+  if lemma.endswith("tif"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"tif{gender_token}ive".join(text.rsplit("tif", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"tif{gender_token}ive{gender_token}s".join(text.rsplit("tifs", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        noun._.value = f"tif{gender_token}ive".join(text.rsplit("tive", 1))
+      elif "Number=Plur" in morph:
+        noun._.value = f"tif{gender_token}ive{gender_token}s".join(text.rsplit("tives", 1))
+
 # Article Definite et Indéfinite
-def replace_article(article: spacy.tokens.Token, gender_token="・"):
-  morph = article.morph
-  text = article.text
+def replace_det(det: spacy.tokens.Token, gender_token="·"):
+  morph = det.morph
+  text = det.text
+  lemma = det.lemma_
   # Articles singular
-  if "Number=Sing" in morph:
+  if "PronType=Art" and "Number=Sing" in morph:
     if "Definite=Def" in morph:
       if "Gender=Masc" in morph:
-        article._.value = f"la{gender_token}" + text
+        det._.value = f"la{gender_token}" + text
       elif "Gender=Fem" in morph:
-        article._.value = text + f"{gender_token}le"
-    else:
+        det._.value = text + f"{gender_token}le"
+    elif "Definite=Ind" in morph:
       if "Gender=Masc" in morph:
-        article._.value = text + f"{gender_token}e"
+        det._.value = text + f"{gender_token}e"
       elif "Gender=Fem" in morph:
-        article._.value = text[:-1] + f"{gender_token}e"
+        det._.value = text[:-1] + f"{gender_token}e"
+
+  if "PronType=Dem" and "Number=Sing" in morph:
+    if lemma.endswith("ce"):
+      if "Gender=Masc" in morph:
+        if text.endswith("t"):
+          det._.value = text[:-1] + f"{gender_token}tte"
+        else:
+          det._.value = text + f"{gender_token}tte"
+      elif "Gender=Fem" in morph:
+        det._.value = text.replace("cette", f"ce{gender_token}tte")
+
+  if "Poss=Yes" and "Number=Sing" in morph:
+    if lemma.endswith("on"):
+      if "Gender=Fem" in morph:
+        det._.value = text + f"{gender_token}on"
+      else:
+        det._.value = f"a{gender_token}on".join(text.rsplit("on", 1))
 
   # Articles plural
   if "Number=Plur" in morph:
@@ -29,278 +324,248 @@ def replace_article(article: spacy.tokens.Token, gender_token="・"):
 # same adjective suffix has different forms of mas/fem adjective suffix
 
 # Adjective
-def replace_adjective(adjective: spacy.tokens.Token, gender_token="・"):
-  morph = adjective.morph
-  text = adjective.text
-  lemma = adjective.lemma_
+def replace_adj(adj: spacy.tokens.Token, gender_token="·"):
+  morph = adj.morph
+  text = adj.text
+  lemma = adj.lemma_
   # eau/elle Adjective
-  if lemma.endswith("eau") or lemma.endswith("elle"):
+  if lemma.endswith("eau"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"elle{gender_token}au".join(text.rsplit("eau",1))
+        adj._.value = f"elle{gender_token}au".join(text.rsplit("eau", 1))
       else:
-        adjective._.value = f"elle{gender_token}au{gender_token}s".join(text.rsplit("eau", 1))
-    if "Gender=Fem" in morph: #lemmatization with the masculine form of -eau
+        adj._.value = f"elle{gender_token}au{gender_token}s".join(text.rsplit("eaux", 1))
+    elif "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"elle{gender_token}au".join(text.rsplit("elle",1))
+        adj._.value = f"elle{gender_token}au".join(text.rsplit("elle", 1))
       else:
-        adjective._.value = f"elle{gender_token}au{gender_token}s".join(text.rsplit("elle", 1))
+        adj._.value = f"elle{gender_token}au{gender_token}s".join(text.rsplit("elles", 1))
 
   # el/elle Adjective
-  if lemma.endswith("el") or lemma.endswith("elle"):
+  if lemma.endswith("el"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"el{gender_token}le".join(text.rsplit("el", 1))
+        adj._.value = f"el{gender_token}le".join(text.rsplit("el", 1))
       else:
-        adjective._.value = f"el{gender_token}le{gender_token}s".join(text.rsplit("el", 1))
-    else: #lemmatization with the masculine form of -el
+        adj._.value = f"el{gender_token}le{gender_token}s".join(text.rsplit("els", 1))
+    elif "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"el{gender_token}le".join(text.rsplit("elle", 1))
+        adj._.value = f"el{gender_token}le".join(text.rsplit("elle", 1))
       else:
-        adjective._.value = f"el{gender_token}le{gender_token}s".join(text.rsplit("elle", 1))
+        adj._.value = f"el{gender_token}le{gender_token}s".join(text.rsplit("elles", 1))
   
-  # teur/trice and deur/drice Adjective
-  if lemma.endswith("eur") or lemma.endswith("rice"): #lemmatization with the feminine form of -rice
-    if "Gender=Masc" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"eur{gender_token}rice".join(text.rsplit("eur", 1))
-      else:
-        adjective._.value = f"eur{gender_token}rice{gender_token}s".join(text.rsplit("eur", 1))
+  # eur/rice;euse;eure Adjective
+  if lemma.endswith("eur"):
     if "Gender=Fem" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"eur{gender_token}rice".join(text.rsplit("rice", 1))
-      else:
-        adjective._.value = f"eur{gender_token}rice{gender_token}s".join(text.rsplit("rice", 1))
+      if text.endswith("rice") or text.endswith("rices"):  # teur/trice and deur/drice Adjective
+        if "Number=Sing" in morph:
+          adj._.value = f"eur{gender_token}rice".join(text.rsplit("rice", 1))
+        elif "Number=Plur" in morph:
+          adj._.value = f"eur{gender_token}rice{gender_token}s".join(text.rsplit("rices", 1))
+      elif text.endswith("euse") or text.endswith("euses"):  # eur/euse Adjective
+        if "Number=Sing" in morph:
+          adj._.value = f"eur{gender_token}euse".join(text.rsplit("euse", 1))
+        elif "Number=Plur" in morph:
+          adj._.value = f"eur{gender_token}euse{gender_token}s".join(text.rsplit("euses", 1))
+      elif text.endswith("eure") or text.endswith("eures"):  # eur/eure Adjective
+        if "Number=Sing" in morph:
+          adj._.value = f"eur{gender_token}e".join(text.rsplit("eure", 1))
+        elif "Number=Plur" in morph:
+          adj._.value = f"eur{gender_token}e{gender_token}s".join(text.rsplit("eures", 1))
 
-  # eur/euse Adjective
-  if lemma.endswith("eur") or lemma.endswith("euse"): #lemmatization with the feminine form of -euse
-    if "Gender=Masc" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"eur{gender_token}euse".join(text.rsplit("eur", 1))
-      else:
-        adjective._.value = f"eur{gender_token}euse{gender_token}s".join(text.rsplit("eur", 1))
+  # oux/ouse;ousse;ouce and eux/euse Adjective
+  if lemma.endswith("oux") or lemma.endswith("eux"):
     if "Gender=Fem" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"eur{gender_token}euse".join(text.rsplit("euse", 1))
-      else:
-        adjective._.value = f"eur{gender_token}euse{gender_token}s".join(text.rsplit("euse", 1))
-
-  # eur/eure Adjective
-  if lemma.endswith("eur") or lemma.endswith("eure"): #lemmatization with the feminine form of -eure
-    if "Gender=Masc" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"eur{gender_token}e".join(text.rsplit("eur", 1))
-      else:
-        adjective._.value = f"eur{gender_token}e{gender_token}s".join(text.rsplit("eur", 1))
-    if "Gender=Fem" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"eur{gender_token}e".join(text.rsplit("eure", 1))
-      else:
-        adjective._.value = f"eur{gender_token}e{gender_token}s".join(text.rsplit("eure", 1))
-        
-  # oux/ouse Adjective
-  if lemma.endswith("oux") or lemma.endswith("ouse"): #lemmatization with the feminine form of -ouse
-    if "Gender=Masc" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"oux{gender_token}e".join(text.rsplit("oux", 1))
-      else:
-        adjective._.value = f"oux{gender_token}e{gender_token}s".join(text.rsplit("oux", 1))
-    if "Gender=Fem" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"oux{gender_token}e".join(text.rsplit("ouse", 1))
-      else:
-        adjective._.value = f"oux{gender_token}e{gender_token}s".join(text.rsplit("ouse", 1))
-
-  # eux/euse Adjective
-  if lemma.endswith("eux") or lemma.endswith("euse"):
-    if "Gender=Masc" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"eux{gender_token}e".join(text.rsplit("eux", 1))
-      else:
-        adjective._.value = f"eux{gender_token}e{gender_token}s".join(text.rsplit("eux", 1))
-    if "Gender=Fem" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"eux{gender_token}e".join(text.rsplit("euse", 1))
-      else:
-        adjective._.value = f"eux{gender_token}e{gender_token}s".join(text.rsplit("euse", 1))
-
-  # oux/ousse Adjective
-  if lemma.endswith("oux") or lemma.endswith("ousse"): #lemmatization with the feminine form of -ousse
-    if "Gender=Masc" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"oux{gender_token}se".join(text.rsplit("oux", 1))
-      else:
-        adjective._.value = f"oux{gender_token}se{gender_token}s".join(text.rsplit("oux", 1))
-    if "Gender=Fem" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"oux{gender_token}se".join(text.rsplit("ousse", 1))
-      else:
-        adjective._.value = f"oux{gender_token}se{gender_token}s".join(text.rsplit("ousse", 1))
-
-  # oux/ouce Adjective
-  if lemma.endswith("oux") or lemma.endswith("ouce"): #lemmatization with the feminine form of -ouce
-    if "Gender=Masc" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"oux{gender_token}ce".join(text.rsplit("oux", 1))
-      else:
-        adjective._.value = f"oux{gender_token}ce{gender_token}s".join(text.rsplit("oux", 1))
-    if "Gender=Fem" in morph:
-      if "Number=Sing" in morph:
-        adjective._.value = f"oux{gender_token}ce".join(text.rsplit("ouse", 1))
-      else:
-        adjective._.value = f"oux{gender_token}ce{gender_token}s".join(text.rsplit("ouce", 1))
+      if text.endswith("ouse") or text.endswith("ouses"):
+        if "Number=Sing" in morph:
+          adj._.value = f"oux{gender_token}e".join(text.rsplit("ouse", 1))
+        elif "Number=Plur" in morph:
+          adj._.value = f"oux{gender_token}e{gender_token}s".join(text.rsplit("ouses", 1))
+      if text.endswith("ousse") or text.endswith("ousses"):
+        if "Number=Sing" in morph:
+          adj._.value = f"oux{gender_token}se".join(text.rsplit("ousse", 1))
+        elif "Number=Plur" in morph:
+          adj._.value = f"oux{gender_token}se{gender_token}s".join(text.rsplit("ousses", 1))
+      if text.endswith("ouce") or text.endswith("oucss"):
+        if "Number=Sing" in morph:
+          adj._.value = f"oux{gender_token}ce".join(text.rsplit("ouce", 1))
+        elif "Number=Plur" in morph:
+          adj._.value = f"oux{gender_token}ce{gender_token}s".join(text.rsplit("ouces", 1))
+      if text.endswith("euse") or text.endswith("euses"):
+        if "Number=Sing" in morph:
+          adj._.value = f"eux{gender_token}e".join(text.rsplit("euse", 1))
+        elif "Number=Plur" in morph:
+          adj._.value = f"eux{gender_token}e{gender_token}s".join(text.rsplit("euses", 1))
 
   # s/se Adjective
-  if lemma.endswith("s") or lemma.endswith("se"): #lemmatization with the feminine form of -se
+  if lemma.endswith("s"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"{gender_token}xe".join(text.rsplit("s", 1))
-      else:
-        adjective._.value = f"{gender_token}xe{gender_token}s".join(text.rsplit("s", 1))
+        adj._.value = f"{gender_token}xe".join(text.rsplit("s", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"{gender_token}xe{gender_token}s".join(text.rsplit("s", 1))
     if "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"{gender_token}xe".join(text.rsplit("se", 1))
-      else:
-        adjective._.value = f"{gender_token}xe{gender_token}s".join(text.rsplit("se", 1))  
+        adj._.value = f"{gender_token}xe".join(text.rsplit("se", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"{gender_token}xe{gender_token}s".join(text.rsplit("ses", 1))
 
   # tre/tresse Adjective
-  if lemma.endswith("tre") or lemma.endswith("tresse"): #lemmatization with the feminine form of -tresse
+  if lemma.endswith("tre"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"tre{gender_token}xe".join(text.rsplit("tre", 1))
-      else:
-        adjective._.value = f"tre{gender_token}xe{gender_token}s".join(text.rsplit("tre", 1))
+        adj._.value = f"tre{gender_token}xe".join(text.rsplit("tre", 1))
+      elif "Number=Plur":
+        adj._.value = f"tre{gender_token}xe{gender_token}s".join(text.rsplit("tres", 1))
     if "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"tre{gender_token}xe".join(text.rsplit("tresse", 1))
-      else:
-        adjective._.value = f"tre{gender_token}xe{gender_token}s".join(text.rsplit("tresse", 1))
+        adj._.value = f"tre{gender_token}xe".join(text.rsplit("tresse", 1))
+      elif "Number=Plur":
+        adj._.value = f"tre{gender_token}xe{gender_token}s".join(text.rsplit("tresses", 1))
 
-  # en/enne Adjective
-  if lemma.endswith("en") or lemma.endswith("enne"):
+  # en/enne and ien/ienne Adjective
+  if lemma.endswith("en"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"en{gender_token}ne".join(text.rsplit("en", 1))
-      else:
-        adjective._.value = f"en{gender_token}ne{gender_token}s".join(text.rsplit("en", 1))
+        adj._.value = f"en{gender_token}ne".join(text.rsplit("en", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"en{gender_token}ne{gender_token}s".join(text.rsplit("ens", 1))
     if "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"en{gender_token}ne".join(text.rsplit("enne", 1))
-      else:
-        adjective._.value = f"en{gender_token}ne{gender_token}s".join(text.rsplit("enne", 1))
+        adj._.value = f"en{gender_token}ne".join(text.rsplit("enne", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"en{gender_token}ne{gender_token}s".join(text.rsplit("ennes", 1))
 
-  # er/ère Adjective
-  if lemma.endswith("er") or lemma.endswith("ère"):
+  # er/ère and ier/ière Adjective
+  if lemma.endswith("er"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"er{gender_token}ère".join(text.rsplit("er", 1))
-      else:
-        adjective._.value = f"er{gender_token}ère{gender_token}s".join(text.rsplit("er", 1))
+        adj._.value = f"er{gender_token}ère".join(text.rsplit("er", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"er{gender_token}ère{gender_token}s".join(text.rsplit("ers", 1))
     if "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"er{gender_token}ère".join(text.rsplit("ère", 1))
-      else:
-        adjective._.value = f"er{gender_token}ère{gender_token}s".join(text.rsplit("ère", 1))
+        adj._.value = f"er{gender_token}ère".join(text.rsplit("ère", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"er{gender_token}ère{gender_token}s".join(text.rsplit("ères", 1))
 
-  # t/te Adjective
-  if lemma.endswith("t") or lemma.endswith("te"):
+  # nt/nte and t/te Adjective
+  if lemma.endswith("t"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"t{gender_token}e".join(text.rsplit("t", 1))
-      else:
-        adjective._.value = f"t{gender_token}e{gender_token}s".join(text.rsplit("t", 1))
+        adj._.value = f"t{gender_token}e".join(text.rsplit("t", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"t{gender_token}e{gender_token}s".join(text.rsplit("ts", 1))
     if "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"t{gender_token}e".join(text.rsplit("te", 1))
-      else:
-        adjective._.value = f"t{gender_token}e{gender_token}s".join(text.rsplit("te", 1))  
+        adj._.value = f"t{gender_token}e".join(text.rsplit("te", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"t{gender_token}e{gender_token}s".join(text.rsplit("tes", 1))
 
-  # d/de Adjective
-  if lemma.endswith("d") or lemma.endswith("de"):
+  # nd/nde Adjective
+  if lemma.endswith("nd"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"d{gender_token}e".join(text.rsplit("d", 1))
-      else:
-        adjective._.value = f"d{gender_token}e{gender_token}s".join(text.rsplit("d", 1))
+        adj._.value = f"d{gender_token}e".join(text.rsplit("nd", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"d{gender_token}e{gender_token}s".join(text.rsplit("nds", 1))
     if "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"d{gender_token}e".join(text.rsplit("de", 1))
-      else:
-        adjective._.value = f"d{gender_token}e{gender_token}s".join(text.rsplit("de", 1))
+        adj._.value = f"d{gender_token}e".join(text.rsplit("nde", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"d{gender_token}e{gender_token}s".join(text.rsplit("ndes", 1))
   
   # on/onne Adjective
-  if lemma.endswith("on") or lemma.endswith("onne"):
+  if lemma.endswith("on"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"on{gender_token}ne".join(text.rsplit("on", 1))
-      else:
-        adjective._.value = f"on{gender_token}ne{gender_token}".join(text.rsplit("on", 1))
+        adj._.value = f"on{gender_token}ne".join(text.rsplit("on", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"on{gender_token}ne{gender_token}".join(text.rsplit("ons", 1))
     elif "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"on{gender_token}ne".join(text.rsplit("onne", 1))
-      else:
-        adjective._.value = f"on{gender_token}ne{gender_token}s".join(text.rsplit("onne", 1))
+        adj._.value = f"on{gender_token}ne".join(text.rsplit("onne", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"on{gender_token}ne{gender_token}s".join(text.rsplit("onnes", 1))
 
   # u/ue Adjective
-  if lemma.endswith("u") or lemma.endswith("ue"):
+  if lemma.endswith("u"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"u{gender_token}e".join(text.rsplit("u", 1))
-      else:
-        adjective._.value = f"u{gender_token}e{gender_token}s".join(text.rsplit("u", 1))
+        adj._.value = f"u{gender_token}e".join(text.rsplit("u", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"u{gender_token}e{gender_token}s".join(text.rsplit("us", 1))
     elif "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"u{gender_token}e".join(text.rsplit("ue", 1))
-      else:
-        adjective._.value = f"u{gender_token}e{gender_token}s".join(text.rsplit("ue", 1))
+        adj._.value = f"u{gender_token}e".join(text.rsplit("ue", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"u{gender_token}e{gender_token}s".join(text.rsplit("ues", 1))
 
   # é/ée Adjective
-  if lemma.endswith("é") or lemma.endswith("ée"):
+  if lemma.endswith("é"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"é{gender_token}e".join(text.rsplit("é", 1))
-      else:
-        adjective._.value = f"é{gender_token}e{gender_token}s".join(text.rsplit("é", 1))
+        adj._.value = f"é{gender_token}e".join(text.rsplit("é", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"é{gender_token}e{gender_token}s".join(text.rsplit("és", 1))
     elif "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"é{gender_token}e".join(text.rsplit("ée", 1))
-      else:
-        adjective._.value = f"é{gender_token}e{gender_token}s".join(text.rsplit("ée", 1))
+        adj._.value = f"é{gender_token}e".join(text.rsplit("ée", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"é{gender_token}e{gender_token}s".join(text.rsplit("ées", 1))
 
   # i/ie Adjective
-  if lemma.endswith("i") or lemma.endswith("ie"):
+  if lemma.endswith("i"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"i{gender_token}e".join(text.rsplit("i", 1))
-      else:
-        adjective._.value = f"i{gender_token}e{gender_token}s".join(text.rsplit("i", 1))
+        adj._.value = f"i{gender_token}e".join(text.rsplit("i", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"i{gender_token}e{gender_token}s".join(text.rsplit("is", 1))
     elif "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"i{gender_token}e".join(text.rsplit("ie", 1))
-      else:
-        adjective._.value = f"i{gender_token}e{gender_token}s".join(text.rsplit("ie", 1))
+        adj._.value = f"i{gender_token}e".join(text.rsplit("ie", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"i{gender_token}e{gender_token}s".join(text.rsplit("ies", 1))
 
   # al/ale Adjective
   if lemma.endswith("al"):
     if "Gender=Masc" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"al{gender_token}e".join(text.rsplit("al", 1))
-  elif lemma.endswith("aux"):
-    if "Gender=Masc" in morph:
-      if "Number=Plur" in morph:
-        adjective._.value = f"al{gender_token}e{gender_token}s".join(text.rsplit("aux", 1))  
-  elif lemma.endswith("ale"):
-    if "Gender=Fem"in morph:
+        adj._.value = f"al{gender_token}e".join(text.rsplit("al", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"al{gender_token}e{gender_token}s".join(text.rsplit("aux", 1))
+    elif "Gender=Fem" in morph:
       if "Number=Sing" in morph:
-        adjective._.value = f"al{gender_token}e".join(text.rsplit("ale", 1))
-      else:
-        adjective._.value = f"al{gender_token}e{gender_token}s".join(text.rsplit("ale", 1))
+        adj._.value = f"al{gender_token}e".join(text.rsplit("ale", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"al{gender_token}e{gender_token}s".join(text.rsplit("ales", 1))
 
   # ef/effe Adjective
-  # tif/tive Adjective
+  if lemma.endswith("ef"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        adj._.value = f"ef{gender_token}fe".join(text.rsplit("ef", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"ef{gender_token}fe{gender_token}s".join(text.rsplit("efs", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        adj._.value = f"ef{gender_token}fe".join(text.rsplit("effe", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"ef{gender_token}fe{gender_token}s".join(text.rsplit("effes", 1))
 
-# TODO: review adjctive suffix and think about the way to match mas-fem adjectives
+  # tif/tive Adjective
+  if lemma.endswith("tif"):
+    if "Gender=Masc" in morph:
+      if "Number=Sing" in morph:
+        adj._.value = f"tif{gender_token}ive".join(text.rsplit("tif", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"tif{gender_token}ive{gender_token}s".join(text.rsplit("tifs", 1))
+    elif "Gender=Fem" in morph:
+      if "Number=Sing" in morph:
+        adj._.value = f"tif{gender_token}ive".join(text.rsplit("tive", 1))
+      elif "Number=Plur" in morph:
+        adj._.value = f"tif{gender_token}ive{gender_token}s".join(text.rsplit("tives", 1))
+
+# TODO: review adjctive suffix and think about the way to match mas-fem nouns and adjectives
 # adding ou/olle and others adjective suffix
 # same adjective suffix has different forms of mas/fem adjective suffix
-
-# Noun
