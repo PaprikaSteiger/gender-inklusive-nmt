@@ -3,7 +3,7 @@ import typing as t
 import spacy
 from spacy.tokens import Token
 
-from special_cases_de import no_replacment, gendered_no_replacement, irregular_replacements, noun_lemma_endings, special_nouns
+from special_cases_de import no_replacment, gendered_no_replacement, irregular_replacements, noun_lemma_endings, special_nouns, nominalized_adjectives
 
 # customize spacy Token slightly to have attribute vor replaced text
 # Token.set_extension("value", default="")
@@ -61,18 +61,18 @@ def replace_article(article: spacy.tokens.Token, gender_token=":"):
 
 # weak declination if
 # ["derselbe", "dieser", "jeder", "jener", "mancher", "welcher", "der", "die", "das", "alle", "sämtliche", "beide"
-# mixed if
+# mixed if ["ein", "kein", "mein", "dein", "sein"]
 #
 def get_declination_type(determiner: spacy.tokens.Token):
     # TODO do for other than Art:
     tag = determiner.tag_
     morph = determiner.morph
     if tag == "ART":
-        if "Definite=Ind" in morph:
+        if "Definite=Ind" in morph or determiner.lemma_ in {"kein"}:
             return "mixed"
         else:
             return "weak"
-    elif determiner.lemma_.lower() in {"diese", "jene", "beid"}:
+    elif determiner.lemma_.lower() in {"diese", "jene", "beid", "jed", "manch", "welch", "alle", "sämtliche"}:
         return "weak"
     else:
         return "strong"
@@ -84,9 +84,17 @@ def get_declination_type(determiner: spacy.tokens.Token):
 def replace_adjective(adjective: spacy.tokens.Token, declination_type: str, gender_token=":"):
     morph = adjective.morph
     text = adjective.text
-    if "Number=Plur" in morph or declination_type=="weak":
+    if "Number=Plur" in morph:
         return None
-    if declination_type=="strong":
+
+    elif declination_type=="weak":
+        if "Case=Acc" in morph:
+            if "Gender=Fem" in morph:
+                adjective._.value = text + f"{gender_token}n"
+            elif "Gender=Masc" in morph:
+                adjective._.value = text[:-1] + f"{gender_token}n"
+
+    elif declination_type=="strong":
         if "Case=Nom" in morph:
             if "Gender=Fem" in morph:
                 adjective._.value = text + f"{gender_token}r"
@@ -114,8 +122,11 @@ def replace_adjective(adjective: spacy.tokens.Token, declination_type: str, gend
                 adjective._.value = text + f"{gender_token}r"
             elif "Gender=Masc" in morph:
                 adjective._.value = text[:-1] + f"{gender_token}r"
-    else:
-        pass
+        elif "Case=Acc" in morph:
+            if "Gender=Fem" in morph:
+                adjective._.value = text + f"{gender_token}n"
+            elif "Gender=Masc" in morph:
+                adjective._.value = text[:-1] + f"{gender_token}n"
 
 
 def replace_type_1(noun: spacy.tokens.Token, ending: t.Iterable[str], gender_token=":"):
@@ -170,6 +181,11 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
         noun._.value = irregular_replacements[lemma]
     elif lemma in special_nouns:
         special_nouns[lemma](noun=noun, gender_token=gender_token)
+    elif lemma in nominalized_adjectives:
+        if noun.left_edge.pos_ == "DET":
+            declination_type = get_declination_type(noun.left_edge)
+            replace_adjective(adjective=noun, declination_type=declination_type, gender_token=gender_token)
+            return True
     for endings, type in noun_lemma_endings.items():
         ending_masc, ending_fem = endings
         if type == 1 and lemma.endswith(f"{ending_masc}") or lemma.endswith(f"{ending_fem}"): # type 1 (er)
@@ -226,7 +242,7 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
         elif type == 3 and lemma.endswith(f"{ending_masc}") or lemma.endswith(f"{ending_fem}"): # type 2 (at, te, et,
             if "Gender=Masc" in morph:
                 if "Number=Plur" in morph:
-                    noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit(f"{ending_masc}", 1))
+                    noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit(f"{ending_masc}en", 1))
                 else:
                     if "Case=Nom" in morph:
                         noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
@@ -242,6 +258,24 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
                     else:
                         noun._.value = f"{ending_masc}en{gender_token}in".join(text.rsplit("in", 1))
             return True
+        elif type == 5 and lemma.endswith(f"{ending_masc}") or lemma.endswith(f"{ending_fem}"): # type 5 te
+            if "Gender=Masc" in morph:
+                if "Number=Plur" in morph:
+                    noun._.value = f"{ending_masc}{gender_token}innen".join(text.rsplit(f"{ending_masc}n", 1))
+                else:
+                    if "Case=Nom" in morph:
+                        noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
+                    else:
+                        noun._.value = f"{ending_masc}n{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
+            # female nouns in in erin
+            elif "Gender=Fem" in morph:
+                if "Number=Plur" in morph:
+                    noun._.value = f"{ending_masc}n{gender_token}innen".join(text.rsplit("in", 1))
+                else:
+                    if "Case=Nom" in morph:
+                        noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
+                    else:
+                        noun._.value = f"{ending_masc}n{gender_token}in".join(text.rsplit("in", 1))
         # nouns in te / tin
         # elif lemma.endswith("te") or lemma.endswith("tin"):
         #     if "Gender=Masc" in morph:

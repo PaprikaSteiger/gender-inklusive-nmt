@@ -163,7 +163,6 @@ def on_match_pp_ad_nn(
     pos = entities.pop(0)
     noun = entities.pop(-1)
     print(entities)
-    breakpoint()
     # check how many words are left and if adjective
     if replace_noun(noun=noun, gender_token=gender_token):
         # replace possessive determiner
@@ -184,8 +183,42 @@ def on_match_su_ip_dp(
     match_id, start, end = matches[i]
     entities = [t for t in Span(doc, start, end, label="EVENT")]
     # first token is the not-determiner
-    pronoun = entities.pop(0)
+    pronoun = entities.pop(-1)
     replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
+    if entities:
+        art = entities.pop(0)
+        replace_article(article=art, gender_token=gender_token)
+
+
+def on_match_nn(
+    matcher: spacy.matcher.Matcher,
+    doc: spacy.tokens.Doc,
+    i: int,
+    matches: t.List[t.Tuple],
+    gender_token: str = ":",
+):
+    # get the matched tokens
+    match_id, start, end = matches[i]
+    entities = [t for t in Span(doc, start, end, label="EVENT")]
+    noun = entities.pop(0)
+    replace_noun(noun=noun, gender_token=gender_token)
+
+
+def on_match_rel(
+    matcher: spacy.matcher.Matcher,
+    doc: spacy.tokens.Doc,
+    i: int,
+    matches: t.List[t.Tuple],
+    gender_token: str = ":",
+):
+    # get the matched tokens
+    match_id, start, end = matches[i]
+    entities = [t for t in Span(doc, start, end, label="EVENT")]
+    rel = entities.pop(0)
+    # the relative pronoun is child of root of relative clause, thus check head of head if it has been replaced
+    ref = rel.head.head
+    if gender_token in ref._.value:
+        replace_article(rel, gender_token=gender_token)
 
 
 def clean_annotated_file(infile: Path, outfile: Path):
@@ -246,6 +279,7 @@ if __name__ == "__main__":
 
     # noun phrase with attributive indefinite or demonstrative pronoun
     ip_dp_nn = [
+        {"TAG": "ART", "OP": "?"},
         {"TAG": {"IN": ["PDAT", "PIAT"]}},
         {"POS": "NOUN"},
     ]
@@ -264,7 +298,7 @@ if __name__ == "__main__":
 
     # isolated noun not preceded by any determiner or pronoun
     nn_isolated = [
-        {"TAG": {"IN": ["PDS", "PIS"]}}
+        {"POS": "NOUN"}
     ]
     # personal pronoun, no entity in sentence, no object, not referring to a noun not describing a person
     pp = [
@@ -272,7 +306,12 @@ if __name__ == "__main__":
     ]
     # substitution indefinite or demonstrative pronoun:
     su_ip_dp = [
+        {"TAG": "ART", "OP": "?"},
         {"TAG": {"IN": ["PDS", "PIS"]}}
+    ]
+
+    relpro = [
+        {"TAG": {"IN": ["PRELAT", "PRELS"]}},
     ]
     # bool(doc.ents) == False or # pronoun doesn t refer to entity
     # possesive pronoun, third person
@@ -291,6 +330,8 @@ if __name__ == "__main__":
     matcher.add("ad_nn", [ad_nn], on_match=on_match_ad_nn)
     matcher.add("su_ip_dp", [su_ip_dp], on_match=on_match_su_ip_dp)
     matcher.add("pp_ad_nn", [pp_ad_nn], on_match=on_match_pp_ad_nn)
+    matcher.add("isolated_nn", [nn_isolated], on_match=on_match_nn)
+    matcher.add("rel_pro", [relpro], on_match=on_match_rel)
     infile = DIR / "german_annotated.txt"
     outfile = DIR / "german_annotated_inclusiv_spacy.txt"
     #clean_annotated_file(infile=(DIR / "german_annotated_inclusive.txt"), outfile=(DIR / "german_annotated_inclusive_clean.txt"))
@@ -298,26 +339,36 @@ if __name__ == "__main__":
         for line in inn:
             print(line)
             doc = nlp(line)
-            breakpoint()
-            print([t.tag_ for t in doc ])
-            print([t.pos_ for t in doc])
-            matches = matcher(doc)
-            print(matches)
+            replace = True
+            # check for entities referring to persons
+            if doc.ents:
+                if 'PER' in [t.ent_type_ for t in doc]:
+                    replace = False
+            # check for tokens inhibiting replacements
+            for lemma in [t.lemma_ for t in doc]:
+                if lemma in gendered_no_replacement:
+                    replace = False
+            if replace:
+
+                #print([t.tag_ for t in doc ])
+                #print([t.pos_ for t in doc])
+                matches = matcher(doc)
+                #print(matches)
             text = " ".join(t._.value or t.text for t in doc)
-            print(text)
+            #print(text)
             out.write(text)
-            #breakpoint()
-            # for token in doc:
-            #     print(
-            #         token.text,
-            #         token.morph,
-                    # token.ent_type_,
-                    # token.ent_iob_,
-                    # token.lemma_,
-                    # token.pos_,
-                    # token.tag_,
-                    # token.dep_,
-                    # token.is_punct
-            #    )
+                #breakpoint()
+                # for token in doc:
+                #     print(
+                #         token.text,
+                #         token.morph,
+                        # token.ent_type_,
+                        # token.ent_iob_,
+                        # token.lemma_,
+                        # token.pos_,
+                        # token.tag_,
+                        # token.dep_,
+                        # token.is_punct
+                #    )
 
     compare_files(gold_file=(DIR / "german_annotated_inclusive_clean.txt"), trial_file=outfile)

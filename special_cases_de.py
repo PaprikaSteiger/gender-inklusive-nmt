@@ -67,7 +67,8 @@ no_replacment = [
     # - ending or
     "Traktor",
 
-
+    # - ending te
+    "Milchprodukte",
 ]
 
 # important noun endings
@@ -75,7 +76,7 @@ noun_lemma_endings = {
     ("er", "in"): 1, # sg ers:in, just dative: ern:innen
     ("ent", "entin"): 3, # nom sg ent:in, sonst sg alles enten:in, plural enten:innen
     ("at", "atin"): 3, # wie ent
-    ("te", "tin"): 3, # wie ent
+    ("te", "tin"): 5, # wie ent, endung einfach nur n nicht en
     ("or", "orin"): 2, # just genitive ors:in, plural always en:innen
     ("eur", "euse"): 4, #Coiffeur
     ("eur","eurin"): 4,
@@ -126,7 +127,15 @@ def replace_freund(noun: spacy.tokens.Token, gender_token=":"):
                 noun._.value = f"{ending_masc}es{gender_token}in".join(text.rsplit("in", 1))
             else:
                 noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
-
+# ein Dritter, eine Dritte
+# einen Dritten, eine Dritte
+# einem Dritten, einer Dritten
+# eines Dritten, einer Dritten
+#
+# der Dritte, die Dritte
+# den Dritten, die Dritte
+# dem Dritten, der Dritten
+# des Dritten, der Dritten
 
 special_nouns: t.Dict[str, t.Callable] = {
     "Freund": replace_freund,
@@ -136,6 +145,17 @@ special_nouns: t.Dict[str, t.Callable] = {
     "Chirurg": replace_freund, #"Chirurgin"
 }
 
+nominalized_adjectives: t.List[str] = [
+    "Dritte",
+    "Dritter",
+    "Zweiter",
+    "Zweite",
+    "Krimineller",
+    "Kriminelle",
+    "Kranker",
+    "Kranke",
+
+]
 
 irregular_replacements = {
     "jedermann": "jeder", # shall be replaced bei jeder
