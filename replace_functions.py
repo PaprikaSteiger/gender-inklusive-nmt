@@ -3,7 +3,7 @@ import typing as t
 import spacy
 from spacy.tokens import Token
 
-from special_cases_de import no_replacment, gendered_no_replacement, irregular_replacements, noun_lemma_endings
+from special_cases_de import no_replacment, gendered_no_replacement, irregular_replacements, noun_lemma_endings, special_nouns
 
 # customize spacy Token slightly to have attribute vor replaced text
 # Token.set_extension("value", default="")
@@ -118,6 +118,35 @@ def replace_adjective(adjective: spacy.tokens.Token, declination_type: str, gend
         pass
 
 
+def replace_type_1(noun: spacy.tokens.Token, ending: t.Iterable[str], gender_token=":"):
+    ending_masc, ending_fem = ending
+    morph = noun.morph
+    text = noun.text
+    if "Gender=Masc" in morph:
+        if "Number=Plur" in morph:
+            if "Case=Dat" in morph:
+                noun._.value = f"{ending_masc}n{gender_token}innen".join(text.rsplit(f"{ending_masc}", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}innen".join(text.rsplit(f"{ending_masc}", 1))
+        else:
+            if "Case=Gen" in morph:
+                noun._.value = f"{ending_masc}s{gender_token}in".join(text.rsplit(f"{ending_masc}s", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
+    # female nouns in in erin
+    elif "Gender=Fem" in morph:
+        if "Number=Plur" in morph:
+            if "Case=Dat" in morph:
+                noun._.value = f"{ending_masc}n{gender_token}innen".join(text.rsplit("innen", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}innen".join(text.rsplit("innnen", 1))
+        else:
+            if "Case=Gen" in morph:
+                noun._.value = f"{ending_masc}s{gender_token}in".join(text.rsplit("in", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
+
+
 def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
     # TODO: the order of checking the endings matter. How to overcome this?
     # TODO: e.g. 'ender' is thus transformed to 'ender:in', but it should be 'ende'
@@ -136,13 +165,15 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
             if lemma.endswith(word):# or lemma.lower().endswith(word.lower()):
                 return None
     if text == "Wunderknabe":
-        breakpoint()
+        pass
     if lemma in irregular_replacements:
-        breakpoint()
         noun._.value = irregular_replacements[lemma]
+    elif lemma in special_nouns:
+        special_nouns[lemma](noun=noun, gender_token=gender_token)
     for endings, type in noun_lemma_endings.items():
         ending_masc, ending_fem = endings
         if type == 1 and lemma.endswith(f"{ending_masc}") or lemma.endswith(f"{ending_fem}"): # type 1 (er)
+            #replace_type_1(noun=noun, ending=(ending_masc, ending_fem), gender_token=gender_token)
             if "Gender=Masc" in morph:
                 if "Number=Plur" in morph:
                     if "Case=Dat" in morph:
@@ -158,9 +189,9 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
             elif "Gender=Fem" in morph:
                 if "Number=Plur" in morph:
                     if "Case=Dat" in morph:
-                        noun._.value = f"{ending_masc}n{gender_token}innen".join(text.rsplit("in", 1))
+                        noun._.value = f"{ending_masc}n{gender_token}innen".join(text.rsplit("innen", 1))
                     else:
-                        noun._.value = f"{ending_masc}{gender_token}innen".join(text.rsplit("in", 1))
+                        noun._.value = f"{ending_masc}{gender_token}innen".join(text.rsplit("innnen", 1))
                 else:
                     if "Case=Gen" in morph:
                         noun._.value = f"{ending_masc}s{gender_token}in".join(text.rsplit("in", 1))

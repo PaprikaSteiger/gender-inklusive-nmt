@@ -1,3 +1,7 @@
+import typing as t
+
+import spacy
+
 gendered_no_replacement = [
     "Mann",
     "Herr",
@@ -84,12 +88,54 @@ noun_lemma_endings = {
 }
 
 
-special_nouns = [
-    "Freund", "Freundin",
-    "Arzt", "Ärztin",
-    "Frisör", # "Friseurin",
-    "Chirurg", "Chirurgin"
-]
+    # der freund die freundin
+    # den freund die freundin
+    # dem freund der freundin
+    # des freundes der freundin
+    #
+    # die freunde die freundinnen
+    # die freunde die freundinnen
+    # den freunden den freundinnen
+    # der freunde der freundinnen
+
+def replace_freund(noun: spacy.tokens.Token, gender_token=":"):
+    morph = noun.morph
+    text = noun.text
+    ending_masc = "nd"
+    ending_fem = "in"
+    if "Gender=Masc" in morph:
+        if "Number=Plur" in morph:
+            if "Case=Dat" in morph:
+                noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit(f"{ending_masc}en", 1))
+            else:
+                noun._.value = f"{ending_masc}e{gender_token}innen".join(text.rsplit(f"{ending_masc}e", 1))
+        else:
+            if "Case=Gen" in morph:
+                noun._.value = f"{ending_masc}s{gender_token}in".join(text.rsplit(f"{ending_masc}es", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
+    # female nouns in in erin
+    elif "Gender=Fem" in morph:
+        if "Number=Plur" in morph:
+            if "Case=Dat" in morph:
+                noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit("innen", 1))
+            else:
+                noun._.value = f"{ending_masc}e{gender_token}innen".join(text.rsplit("innnen", 1))
+        else:
+            if "Case=Gen" in morph:
+                noun._.value = f"{ending_masc}es{gender_token}in".join(text.rsplit("in", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
+
+
+special_nouns: t.Dict[str, t.Callable] = {
+    "Freund": replace_freund,
+    "Freundin": replace_freund,
+    "Arzt": replace_freund, #Ärztin",
+    "Frisör": replace_freund, #"Friseurin",
+    "Chirurg": replace_freund, #"Chirurgin"
+}
+
 
 irregular_replacements = {
     "jedermann": "jeder", # shall be replaced bei jeder

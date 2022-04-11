@@ -11,7 +11,7 @@ from replace_functions import replace_article, replace_adjective, \
     replace_noun, get_declination_type, replace_personal_pronoun
 from special_cases_de import gendered_no_replacement, noun_lemma_endings
 
-# list of all pos taggs, dependencies etc
+# list of all pos tags, dependencies etc
 # https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
 # important linguistic features
 #                 token.text
@@ -120,7 +120,6 @@ def on_match_ip_dp_nn(
     # only transform pronoun if transformation applied to noun
     if replace_noun(noun=noun, gender_token=gender_token):
         replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
-        # TODO: replace pronouns
 
 
 def on_match_ad_nn(
@@ -157,7 +156,21 @@ def on_match_pp_ad_nn(
         matches: t.List[t.Tuple],
         gender_token: str=":",
 ) -> None:
-    pass
+    # get the matched tokens
+    match_id, start, end = matches[i]
+    entities = [t for t in Span(doc, start, end, label="EVENT")]
+    # first token is possessive determiner
+    pos = entities.pop(0)
+    noun = entities.pop(-1)
+    print(entities)
+    breakpoint()
+    # check how many words are left and if adjective
+    if replace_noun(noun=noun, gender_token=gender_token):
+        # replace possessive determiner
+        replace_adjective(adjective=pos, declination_type="strong", gender_token=gender_token)
+        adjectives = [t for t in entities if t.tag_ == "ADJA"]
+        for adjective in adjectives:
+            replace_adjective(adjective=adjective, declination_type="weak", gender_token=gender_token)
 
 
 def on_match_su_ip_dp(
@@ -203,13 +216,13 @@ if __name__ == "__main__":
     # noun phrases with article modified by possibly various adjectives and adverbs
     # possible separated by a conjunction or
     # TODO: what about adj, adj, adj (...) noun?
+    # das sehr grosse, besonders grüne Haus
     ar_ad_nn = [
         {"TAG": "ART"},
-        {"POS": {"IN":["ADV", "ADJD"]}, "OP": "*"},
+        {"POS": "ADV", "OP": "*"},
         {"TAG": "ADJA", "OP": "*"},
-        {"LEMMA": {"IN": ["und", "sowie"]}, "OP": "*"},
         {"IS_PUNCT": True, "OP": "?"},
-        {"POS": {"IN":["ADV", "ADJD"]}, "OP": "*"},
+        {"POS": "ADV", "OP": "*"},
         {"TAG": "ADJA", "OP": "*"},
         {"POS": "NOUN"}
     ]
@@ -240,8 +253,13 @@ if __name__ == "__main__":
     # noun phrase with attributive possessive pronoun and possible adjectives
     pp_ad_nn = [
         {"TAG": "PPOSAT"},
+        # {"POS": {"IN": ["ADV"]}, "OP": "*"},
+        # {"TAG": "ADJA", "OP": "*"},
+        # {"LEMMA": {"IN": ["und", "sowie"]}, "OP": "?"},
+        # {"IS_PUNCT": True, "OP": "?"},
+        # {"POS": {"IN": ["ADV", "ADJD"]}, "OP": "*"},
         {"TAG": "ADJA", "OP": "*"},
-        {"Tag": "NOUN"}
+        {"POS": "NOUN"}
     ]
 
     # isolated noun not preceded by any determiner or pronoun
@@ -272,6 +290,7 @@ if __name__ == "__main__":
     matcher.add("id_dp_nn", [ip_dp_nn], on_match=on_match_ip_dp_nn)
     matcher.add("ad_nn", [ad_nn], on_match=on_match_ad_nn)
     matcher.add("su_ip_dp", [su_ip_dp], on_match=on_match_su_ip_dp)
+    matcher.add("pp_ad_nn", [pp_ad_nn], on_match=on_match_pp_ad_nn)
     infile = DIR / "german_annotated.txt"
     outfile = DIR / "german_annotated_inclusiv_spacy.txt"
     #clean_annotated_file(infile=(DIR / "german_annotated_inclusive.txt"), outfile=(DIR / "german_annotated_inclusive_clean.txt"))
@@ -279,6 +298,7 @@ if __name__ == "__main__":
         for line in inn:
             print(line)
             doc = nlp(line)
+            breakpoint()
             print([t.tag_ for t in doc ])
             print([t.pos_ for t in doc])
             matches = matcher(doc)
