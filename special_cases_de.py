@@ -21,8 +21,6 @@ no_replacment = [
     "Fehler",
     "Hunger",
     "20er", #TODO: in general numbers+er
-    "Zweiter",
-    "Dritter", # ...
     "Leiter", # only if die Leiter
     "Butter",
     "Papier",
@@ -112,7 +110,7 @@ def replace_freund(noun: spacy.tokens.Token, gender_token=":"):
                 noun._.value = f"{ending_masc}e{gender_token}innen".join(text.rsplit(f"{ending_masc}e", 1))
         else:
             if "Case=Gen" in morph:
-                noun._.value = f"{ending_masc}s{gender_token}in".join(text.rsplit(f"{ending_masc}es", 1))
+                noun._.value = f"{ending_masc}es{gender_token}in".join(text.rsplit(f"{ending_masc}es", 1))
             else:
                 noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
     # female nouns in in erin
@@ -129,20 +127,125 @@ def replace_freund(noun: spacy.tokens.Token, gender_token=":"):
                 noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
 # ein Dritter, eine Dritte
 # einen Dritten, eine Dritte
-# einem Dritten, einer Dritten
-# eines Dritten, einer Dritten
-#
-# der Dritte, die Dritte
-# den Dritten, die Dritte
-# dem Dritten, der Dritten
-# des Dritten, der Dritten
+def replace_arzt(noun: spacy.tokens.Token, gender_token=":"):
+    morph = noun.morph
+    text = noun.text
+    ending_masc = "zt"
+    ending_fem = "in"
+    if "Gender=Masc" in morph:
+        if "Number=Plur" in morph:
+            if "Case=Dat" in morph:
+                noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit(f"{ending_masc}en", 1))
+            else:
+                noun._.value = f"{ending_masc}e{gender_token}innen".join(text.rsplit(f"{ending_masc}e", 1))
+        else:
+            if "Case=Gen" in morph:
+                noun._.value = f"{ending_masc}es{gender_token}in".join(text.rsplit(f"{ending_masc}es", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
+    # female nouns in in erin
+    elif "Gender=Fem" in morph:
+        if "Number=Plur" in morph:
+            if "Case=Dat" in morph:
+                noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit("innen", 1))
+            else:
+                noun._.value = f"{ending_masc}e{gender_token}innen".join(text.rsplit("innnen", 1))
+        else:
+            if "Case=Gen" in morph:
+                noun._.value = f"{ending_masc}es{gender_token}in".join(text.rsplit("in", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
+
+
+def replace_frisör(noun: spacy.tokens.Token, gender_token=":"):
+    morph = noun.morph
+    text = noun.text
+    ending_masc = "ör"
+    ending_fem = "in"
+    if "Gender=Masc" in morph:
+        if "Number=Plur" in morph:
+            if "Case=Dat" in morph:
+                noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit(f"{ending_masc}en", 1))
+            else:
+                noun._.value = f"{ending_masc}e{gender_token}innen".join(text.rsplit(f"{ending_masc}e", 1))
+        else:
+            if "Case=Gen" in morph:
+                noun._.value = f"{ending_masc}es{gender_token}in".join(text.rsplit(f"{ending_masc}es", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
+    # female nouns in in erin
+    elif "Gender=Fem" in morph:
+        if "Number=Plur" in morph:
+            if "Case=Dat" in morph:
+                noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit("innen", 1))
+            else:
+                noun._.value = f"{ending_masc}e{gender_token}innen".join(text.rsplit("innnen", 1))
+        else:
+            if "Case=Gen" in morph:
+                noun._.value = f"{ending_masc}es{gender_token}in".join(text.rsplit("in", 1))
+            else:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
+
+
+def replace_chirurg(noun: spacy.tokens.Token, gender_token=":"):
+    morph = noun.morph
+    text = noun.text
+    ending_masc = "urg"
+    ending_fem = "in"
+    if "Gender=Masc" in morph:
+        if "Number=Plur" in morph:
+            noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit(f"{ending_masc}en", 1))
+        else:
+            if "Case=Nom" in morph:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
+            else:
+                noun._.value = f"{ending_masc}en{gender_token}in".join(text.rsplit(f"{ending_masc}en", 1))
+    # female nouns in in erin
+    elif "Gender=Fem" in morph:
+        if "Number=Plur" in morph:
+            noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit("innen", 1))
+        else:
+            if "Case=Nom" in morph:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
+            else:
+                noun._.value = f"{ending_masc}en{gender_token}in".join(text.rsplit("in", 1))
+
+
+def replace_virtuose(noun: spacy.tokens.Token, gender_token=":"):
+    morph = noun.morph
+    text = noun.text
+    ending_masc = "se"
+    ending_fem = "in"
+    if "Gender=Masc" in morph:
+        if "Number=Plur" in morph:
+            noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit(f"{ending_masc}en", 1))
+        else:
+            if "Case=Nom" in morph:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
+            else:
+                noun._.value = f"{ending_masc}en{gender_token}in".join(text.rsplit(f"{ending_masc}en", 1))
+    # female nouns in in erin
+    elif "Gender=Fem" in morph:
+        if "Number=Plur" in morph:
+            noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit("innen", 1))
+        else:
+            if "Case=Nom" in morph:
+                noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
+            else:
+                noun._.value = f"{ending_masc}en{gender_token}in".join(text.rsplit("in", 1))
+
 
 special_nouns: t.Dict[str, t.Callable] = {
     "Freund": replace_freund,
     "Freundin": replace_freund,
-    "Arzt": replace_freund, #Ärztin",
-    "Frisör": replace_freund, #"Friseurin",
-    "Chirurg": replace_freund, #"Chirurgin"
+    "Arzt": replace_arzt,
+    "Ärztin": replace_arzt,
+    "Frisör": replace_frisör,
+    "Friseurin": replace_frisör,
+    "Chirurg": replace_chirurg,
+    "Chirurgin": replace_chirurg,
+    "Virtuose": replace_virtuose,
+    "Virtuosin": replace_virtuose,
 }
 
 nominalized_adjectives: t.List[str] = [
@@ -154,6 +257,9 @@ nominalized_adjectives: t.List[str] = [
     "Kriminelle",
     "Kranker",
     "Kranke",
+    "Meditierende",
+    "Meditierender",
+
 
 ]
 

@@ -58,17 +58,16 @@ def on_match_ar_ad_nn(
     # get the matched tokens
     match_id, start, end = matches[i]
     entities = [t for t in Span(doc, start, end, label="EVENT")]
-
     article = entities.pop(0)
     noun = entities.pop(-1)
     # TODO decide given the noun whether to replace anything or not -> or is this a job for the replace noun function?
     # Check endings of lemma
     # check the noun if something has to be replaced
-    if noun.lemma_ in gendered_no_replacement:
-        return
-    # todo: move this part to the replace noun function, so I might check the noun of a match if it was change and decide based on that if the rest has to be changed or not
-    if not any(noun.lemma_.endswith(ending) for ending in noun_lemma_endings):
-        return None
+    # if noun.lemma_ in gendered_no_replacement:
+    #     return
+    # # todo: move this part to the replace noun function, so I might check the noun of a match if it was change and decide based on that if the rest has to be changed or not
+    # if not any(noun.lemma_.endswith(ending) for ending in noun_lemma_endings):
+    #     return None
     # no adjective or adverb
     if len(entities) == 0:
         if replace_noun(noun=noun, gender_token=gender_token):
@@ -350,7 +349,7 @@ if __name__ == "__main__":
                     replace = False
             if replace:
 
-                #print([t.tag_ for t in doc ])
+                print([t.lemma_ for t in doc ])
                 #print([t.pos_ for t in doc])
                 matches = matcher(doc)
                 #print(matches)

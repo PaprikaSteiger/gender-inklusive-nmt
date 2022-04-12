@@ -35,7 +35,7 @@ def replace_article(article: spacy.tokens.Token, gender_token=":"):
             if "Gender=Fem" in morph:
                 article._.value = text + f"{gender_token}n"
             elif "Gender=Masc" in morph:
-                article._.value = text[:-1] + f"r{gender_token}n"
+                article._.value = text[:-1] + f"{gender_token}n"
     else:
         if "Case=Nom" in morph:
             if "Gender=Fem" in morph:
@@ -179,9 +179,14 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
         pass
     if lemma in irregular_replacements:
         noun._.value = irregular_replacements[lemma]
+        return True
     elif lemma in special_nouns:
+        if lemma == "Virtuose":
+            breakpoint()
         special_nouns[lemma](noun=noun, gender_token=gender_token)
+        return True
     elif lemma in nominalized_adjectives:
+        #breakpoint()
         if noun.left_edge.pos_ == "DET":
             declination_type = get_declination_type(noun.left_edge)
             replace_adjective(adjective=noun, declination_type=declination_type, gender_token=gender_token)
@@ -276,6 +281,7 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
                         noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
                     else:
                         noun._.value = f"{ending_masc}n{gender_token}in".join(text.rsplit("in", 1))
+            return True
         # nouns in te / tin
         # elif lemma.endswith("te") or lemma.endswith("tin"):
         #     if "Gender=Masc" in morph:
