@@ -105,7 +105,7 @@ def on_match_det_noun(
     # Noun suffix list
     if not any(noun.lemma_.endswith(ending) for ending in noun_lemma_endings):
         return None
-    if len(entities) == 1:
+    if len(entities) == 0:
         replace_noun(noun=noun, gender_token=gender_token)
         if gender_token in noun._.value:
             replace_det(det=det, gender_token=gender_token)
@@ -152,6 +152,7 @@ def on_match_pron(
     # get the matched tokens
     match_id, start, end = matches[i]
     entities = [t for t in Span(doc, start, end, label="EVENT")]
+    assert len(entities) == 1
     pronoun = entities[0]
     replace_pron(pron=pronoun, gender_token=gender_token)
 
@@ -165,6 +166,7 @@ def on_match_pron_adj(
     # get the matched tokens
     match_id, start, end = matches[i]
     entities = [t for t in Span(doc, start, end, label="EVENT")]
+    #assert len(entities) == 1
     adj = entities[0]
     replace_adj(adj=adj, gender_token=gender_token)
 
@@ -179,12 +181,12 @@ def on_match_pron_noun(
     # get the matched tokens
     match_id, start, end = matches[i]
     entities = [t for t in Span(doc, start, end, label="EVENT")]
-    assert len(entities) == 1
+    #assert len(entities) == 1
     noun = entities[0]
     replace_noun(noun=noun, gender_token=gender_token)
 
 def on_match_name_noun(
-matcher: spacy.matcher.Matcher,
+        matcher: spacy.matcher.Matcher,
         doc: spacy.tokens.Doc,
         i: int,
         matches: t.List[t.Tuple],
@@ -262,9 +264,10 @@ if __name__ == "__main__":
     matcher.add("pron_adj", [pron_adj], on_match=on_match_pron_adj)
     matcher.add("pron_noun", [pron_noun], on_match=on_match_pron_noun)
     matcher.add("name_noun", [name_noun], on_match=on_match_name_noun)
-    infile = DIR / "fr_test_draft.txt"
-    outfile = DIR / "fr_test_draft_annotated_spacy.txt"
-    #clean_annotated_file(infile=(DIR / "fr_test_set_annotated_spacy.txt"), outfile=(DIR / "fr_test_set_annotated_spacy_clean.txt"))
+
+    infile = DIR / "fr_test_set.txt"
+    outfile = DIR / "fr_test_set_annotated_spacy.txt"
+
     with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
         for sent in inn:
             print(sent)
@@ -277,7 +280,8 @@ if __name__ == "__main__":
             print(text)
             out.write(text)
 
-    #compare_files(gold_file=(DIR / "fr_test_set_annotated.txt"), trial_file=outfile)
+    clean_annotated_file(infile=(DIR / "fr_test_set_annotated.txt"), outfile=(DIR / "fr_test_set_annotated_spacy_clean.txt"))
+    compare_files(gold_file=(DIR / "fr_test_set_annotated.txt"), trial_file=outfile)
 
     annotated_file = open(DIR / outfile).read()
     gold_file = open(DIR / "fr_test_set_annotated.txt").read()
