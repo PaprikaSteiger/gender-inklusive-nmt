@@ -2,6 +2,25 @@ import typing as t
 
 import spacy
 
+# special words
+pronouns = {
+    # jeder
+    # jedermann
+    "jemand",
+    "niemand",
+    "alle",
+    "manche",
+    "beide",
+    "viele",
+
+}
+
+special_cases = [
+    "kein", # mixed declination, not weak one
+
+
+]
+
 gendered_no_replacement = [
     "Mann",
     "Herr",
@@ -33,6 +52,8 @@ no_replacment = [
     #"Boomer", TODO: ask an expert?
     #"Barde", TODO: ask an expert?
     "Meter",
+    "Quadratmeter",
+    "Kubikmeter",
     "Kilometer",
     "Wasser",
     "Muster",
@@ -54,6 +75,7 @@ no_replacment = [
     "Gelächter",
     "Becher",
     "Manier",
+    "Gründer",
 
     # - ending in
     "Medizin",
@@ -67,6 +89,15 @@ no_replacment = [
 
     # - ending te
     "Milchprodukte",
+    "Minute",
+    "Geschichte",
+
+
+    # - ending at
+    "Staat",
+    "Plakat",
+    "Monat",
+
 ]
 
 # important noun endings

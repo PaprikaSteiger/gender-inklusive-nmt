@@ -3,6 +3,7 @@ import numpy as np
 import typing as t
 from collections import Counter
 import re
+from math import floor
 
 from spacy import Language
 import spacy
@@ -85,12 +86,62 @@ def spacy_statistics_of_test_set(test_set: str, spacy_model: Language):
     return pos, morph, length
 
 
+def create_train(
+        source_files: t.List[str],
+        test_data: str,
+        out_file: str
+):
+    count = 0
+    test_lines = open(test_data, "r", encoding="utf8").readlines()
+    with open(out_file, "w", encoding="utf8") as outt:
+        for file in source_files:
+            with open(file, "r", encoding="utf8") as inn:
+                for line in inn:
+
+                    # don't add sentences with noise to test set
+                    if any(line.startswith(ele) or ele in line for ele in CORPUS_NOISE):
+                        continue
+                    # block sentences with less than or two tokens
+                    if len(line.split(" ")) <= 2:
+                        continue
+                    if line in test_lines:
+                        continue
+                    outt.write(line)
+                    count += 1
+    print(count)
+
+def create_validation_set(
+        train_data: str,
+        train_out: str,
+        val_out: str,
+        validation_split: float,
+):
+    lines = open(train_data, "r", encoding="utf8").readlines()
+    length = len(lines)
+    # generate n random intengers in range (0, length)
+    n = floor(length * validation_split)
+    indices = np.random.randint(0, length, n)
+    indices_set = set(indices)
+    while not len(indices_set) == len(indices):
+        new_int = np.random.randint(0, length)
+        if new_int not in indices_set:
+            indices_set.add(new_int)
+    with open(val_out, "w", encoding="utf8") as val:
+        for i in indices_set:
+            val.write(lines[i])
+    with open(train_out, "w", encoding="utf8") as train:
+        for i, line in enumerate(lines, start=0):
+            if i in indices_set:
+                continue
+            else:
+                train.write(line)
+
 if __name__ == "__main__":
     # create_test_set(
     #     sources=[
     #         (r"C:\Users\steig\Desktop\data\ted_13_de.txt", 400),  # ted 13
     #         (r"C:\Users\steig\Desktop\data\ted_20_de.txt", 350), # ted 20
-    #         # europarl
+    #         (r"C:\Users\steig\Desktop\Neuer Ordner\data\europarl_de.txt", 200) #europarl
     #     ],
     #     out_file=str(DIR / "test_set_de.txt")
     # )
@@ -98,4 +149,20 @@ if __name__ == "__main__":
     #     test_set=str(DIR / "test_set_de.txt"),
     #     spacy_model=spacy.load("de_core_news_lg")
     # )
+    # files =
+    # create_train(
+    #     source_files=[
+    #     r"C:\Users\steig\Desktop\Neuer Ordner\data\ted_13_de.txt",
+    #     r"C:\Users\steig\Desktop\Neuer Ordner\data\ted_20_de.txt",
+    #     r"C:\Users\steig\Desktop\Neuer Ordner\data\europarl_de.txt",
+    # ],
+    # test_data=str(DIR / "test_set_de.txt"),
+    # out_file=r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_de.txt",
+    # )
+    create_validation_set(
+        train_data=r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_de.txt",
+        train_out=str(DIR / "train_text.de"),
+        val_out=str(DIR / "val_text.de"),
+        validation_split=
+    )
 

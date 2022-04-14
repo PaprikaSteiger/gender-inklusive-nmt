@@ -244,7 +244,7 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
                     else:
                         noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
             return True
-        elif type == 3 and lemma.endswith(f"{ending_masc}") or lemma.endswith(f"{ending_fem}"): # type 2 (at, te, et,
+        elif type == 3 and lemma.endswith(f"{ending_masc}") or lemma.endswith(f"{ending_fem}"): # type 2 (at, et,
             if "Gender=Masc" in morph:
                 if "Number=Plur" in morph:
                     noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit(f"{ending_masc}en", 1))

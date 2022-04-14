@@ -9,7 +9,7 @@ from load_corpus import DIR
 
 from replace_functions import replace_article, replace_adjective, \
     replace_noun, get_declination_type, replace_personal_pronoun
-from special_cases_de import gendered_no_replacement, noun_lemma_endings
+from special_cases_de import gendered_no_replacement, noun_lemma_endings, irregular_replacements
 
 # list of all pos tags, dependencies etc
 # https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
@@ -34,18 +34,6 @@ from special_cases_de import gendered_no_replacement, noun_lemma_endings
 
 # customize spacy Token slightly to have attribute vor replaced text
 Token.set_extension("value", default="")
-
-# special words
-pronouns = {
-    # jeder
-    # jedermann
-}
-
-special_cases = [
-    "kein", # mixed declination, not weak one
-
-
-]
 
 
 def on_match_ar_ad_nn(
@@ -115,10 +103,14 @@ def on_match_ip_dp_nn(
     entities = [t for t in Span(doc, start, end, label="EVENT")]
     pronoun = entities.pop(0)
     noun = entities.pop(0)
+    #breakpoint()
     # the pronoun follows (as it is used attributively without determiner) the strong declination of an adjective
     # only transform pronoun if transformation applied to noun
     if replace_noun(noun=noun, gender_token=gender_token):
-        replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
+        if pronoun.lemma_ == "kein":
+            replace_adjective(adjective=pronoun, declination_type="mixed", gender_token=gender_token)
+        else:
+            replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
 
 
 def on_match_ad_nn(
@@ -183,7 +175,10 @@ def on_match_su_ip_dp(
     entities = [t for t in Span(doc, start, end, label="EVENT")]
     # first token is the not-determiner
     pronoun = entities.pop(-1)
-    replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
+    if pronoun.lemma_ == "kein":
+        replace_adjective(adjective=pronoun, declination_type="mixed", gender_token=gender_token)
+    else:
+        replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
     if entities:
         art = entities.pop(0)
         replace_article(article=art, gender_token=gender_token)
@@ -230,7 +225,7 @@ def clean_annotated_file(infile: Path, outfile: Path):
 
 def compare_files(gold_file: Path, trial_file: Path):
     differences = []
-    with gold_file.open("r", encoding="utf8") as gold, trial_file.open("r", encoding="utf8") as trial, open((outfile.parent / "differences.txt"), "w", encoding="utf8") as out:
+    with open(gold_file, "r", encoding="utf8") as gold, open(trial_file, "r", encoding="utf8") as trial, open((outfile.parent / "differences.txt"), "w", encoding="utf8") as out:
         for gold_line, trial_line in zip(gold, trial):
             if not gold_line.replace(" ", "") == trial_line.replace(" ", ""):
                 differences.append(trial_line)
@@ -331,13 +326,17 @@ if __name__ == "__main__":
     matcher.add("pp_ad_nn", [pp_ad_nn], on_match=on_match_pp_ad_nn)
     matcher.add("isolated_nn", [nn_isolated], on_match=on_match_nn)
     matcher.add("rel_pro", [relpro], on_match=on_match_rel)
-    infile = DIR / "german_annotated.txt"
-    outfile = DIR / "german_annotated_inclusiv_spacy.txt"
+    infile = r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_de.txt"
+    outfile = DIR / "german_annotated_inclusiv_spacy_test.txt"
     #clean_annotated_file(infile=(DIR / "german_annotated_inclusive.txt"), outfile=(DIR / "german_annotated_inclusive_clean.txt"))
     with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
         for line in inn:
             print(line)
             doc = nlp(line)
+            # irregular replacements
+            # for token in doc:
+            #     if token.lemma_ in irregular_replacements:
+
             replace = True
             # check for entities referring to persons
             if doc.ents:
@@ -370,4 +369,4 @@ if __name__ == "__main__":
                         # token.is_punct
                 #    )
 
-    compare_files(gold_file=(DIR / "german_annotated_inclusive_clean.txt"), trial_file=outfile)
+    #compare_files(gold_file=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.txt", trial_file=outfile)
