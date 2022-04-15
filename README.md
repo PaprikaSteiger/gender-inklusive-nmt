@@ -1,7 +1,7 @@
 # gender-inklusive-nmt
 Gender-inklusive nmt system for German and French
 
-# Preprocessing
+## Preprocessing
 We adopted byte-pair encoding for tokenized data (Sennrich et al., 2016).
 ```
 cat train.fr |subword-nmt learn-bpe -s 3000 > train.fr.bpe
@@ -9,7 +9,7 @@ cat train_annotated.fr |subword-nmt learn-bpe -s 3000 > train_annotated.fr.bpe
 cat validation.fr |subword-nmt learn-bpe -s 3000 > validation.fr.bpe
 cat validation_annotated.fr |subword-nmt learn-bpe -s 3000 > validation_annotated.fr.bpe
 ```
-# Training
+## Training
 Before training, we prepare the training data by splitting it into shards and serializing it into matrix format.
 ```
 python -m sockeye.prepare_data \
@@ -34,7 +34,7 @@ python -m sockeye.train \
 --learning-rate-scheduler-type inv-sqrt-decay --learning-rate-warmup 4000 \
 --seed 1
 ```
-# Evaluation (on working)
+## Evaluation (on working)
 After training, we rewrite the preprocessed test set.
 ```
 python -m sockeye.translate \
