@@ -4,10 +4,11 @@ Gender-inklusive nmt system for German and French
 ## Preprocessing
 We adopted byte-pair encoding for tokenized data (Sennrich et al., 2016).
 ```
-cat train.fr |subword-nmt learn-bpe -s 3000 > train.fr.bpe
-cat train_annotated.fr |subword-nmt learn-bpe -s 3000 > train_annotated.fr.bpe
-cat validation.fr |subword-nmt learn-bpe -s 3000 > validation.fr.bpe
-cat validation_annotated.fr |subword-nmt learn-bpe -s 3000 > validation_annotated.fr.bpe
+cat train.fr train_annotated.fr |subword-nmt learn-bpe -s 3000 > train_codes
+for set in train validation test; do
+  subword-nmt apply-bpe -c train_codes <${set}.fr >${set}.fr.bpe
+  subword-nmt apply-bpe -c train_codes <${set}_annotated.fr >${set}_annotated.fr.bpe
+done
 ```
 ## Training
 Before training, we prepare the training data by splitting it into shards and serializing it into matrix format.
