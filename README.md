@@ -41,7 +41,7 @@ After training, we rewrite the preprocessed test set.
 python -m sockeye.translate \
 --input test.fr.bpe \
 --output out.bpe \
---model model \
+--model new_model \
 --dtype float16 \
 --beam-size 5 \
 --batch-size 64
