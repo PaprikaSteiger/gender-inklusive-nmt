@@ -30,7 +30,7 @@ python -m sockeye.train \
 --transformer-model-size 1024 --transformer-attention-heads 16 \
 --transformer-feed-forward-num-hidden 4096 --amp --batch-type max-word \
 --batch-size 5000 --update-interval 80 --checkpoint-interval 500 \
---max-num-checkpoint-not-improved 10 --optimizer-betas 0.9:0.98 \
+--max-num-checkpoint-not-improved 5 --optimizer-betas 0.9:0.98 \
 --initial-learning-rate 0.06325 \
 --learning-rate-scheduler-type inv-sqrt-decay --learning-rate-warmup 4000 \
 --seed 1
