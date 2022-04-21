@@ -50,5 +50,5 @@ python -m sockeye.translate \
 We then reverse BPE and score the translations against the reference using sacreBLEU.
 ```
 sed -re 's/(@@ |@@$)//g' <out.bpe >out.tok
-sacrebleu test.de -tok none -i out.tok
+sacrebleu test_annotated.fr -tok none -i out.tok
 ```
