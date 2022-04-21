@@ -45,8 +45,9 @@ python -m sockeye.translate \
 --dtype float16 \
 --beam-size 5 \
 --batch-size 64
+```
 
-We then reverse BPE and score the translations against the reference using sacreBLEU:
+We then reverse BPE and score the translations against the reference using sacreBLEU.
 ```
 sed -re 's/(@@ |@@$)//g' <out.bpe >out.tok
 sacrebleu test.de -tok none -i out.tok
