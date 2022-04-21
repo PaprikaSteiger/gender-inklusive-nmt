@@ -39,7 +39,7 @@ python -m sockeye.train \
 After training, we rewrite the preprocessed test set.
 ```
 python -m sockeye.translate \
---input test_annotated.fr.bpe \
+--input test.fr.bpe \
 --output out.bpe \
 --model model \
 --dtype float16 \
