@@ -114,12 +114,18 @@ def create_validation_set(
         train_data: str,
         train_out: str,
         val_out: str,
-        validation_split: float,
+        validation_split: t.Optional[float]=None,
+        validation_number: t.Optional[int]=None,
 ):
     lines = open(train_data, "r", encoding="utf8").readlines()
     length = len(lines)
     # generate n random intengers in range (0, length)
-    n = floor(length * validation_split)
+    if validation_split:
+        n = floor(length * validation_split)
+    elif validation_number:
+        n = validation_number
+    else:
+        assert False, "Chose validation_split or validation_number"
     indices = np.random.randint(0, length, n)
     indices_set = set(indices)
     while not len(indices_set) == len(indices):
@@ -160,9 +166,9 @@ if __name__ == "__main__":
     # out_file=r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_de.txt",
     # )
     create_validation_set(
-        train_data=r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_de.txt",
+        train_data=r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_annotated_de.txt",
         train_out=str(DIR / "train_text.de"),
         val_out=str(DIR / "val_text.de"),
-        validation_split=
+        validation_number=3000,
     )
 

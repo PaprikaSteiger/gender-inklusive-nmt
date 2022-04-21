@@ -3,18 +3,44 @@ import typing as t
 import spacy
 
 # special words
-pronouns = {
-    # jeder
-    # jedermann
+pronouns_no_replacement = {
     "jemand",
+    "irgendjemand",
     "niemand",
     "alle",
     "manche",
     "beide",
     "viele",
+    "eine",
+    "einige",
+    "einig",
 
 }
 
+# all words in ende/ender
+nominalized_adjectives: t.List[str] = [
+    "Dritte",
+    "Dritter",
+    "Zweiter",
+    "Zweite",
+    "Krimineller",
+    "Kriminelle",
+    "Kranker",
+    "Kranke",
+    "Meditierende",
+    "Meditierender",
+
+
+]
+
+pre_replacements = {
+    "jedermanns": "jedes",
+    "Jedermanns": "Jedes",
+    "jedermann": "jeder",
+    "Jedermann": "Jeder",
+    "Wunderknabe": "Wunderkind",
+
+}
 special_cases = [
     "kein", # mixed declination, not weak one
 
@@ -25,11 +51,15 @@ gendered_no_replacement = [
     "Mann",
     "Herr",
     "Frau",
+    "Tochter",
+    "Sohn"
 ]
 # tokens where gender inclusive shall not be used
 no_replacment = [
     "Mutter",
     "Vater",
+    "Tochter",
+    "Sohn",
     "Computer",
     "Roboter",
     "Eimer", #And komposita
@@ -40,7 +70,14 @@ no_replacment = [
     "Fehler",
     "Hunger",
     "20er", #TODO: in general numbers+er
-    "Leiter", # only if die Leiter
+    "30er",
+    "40er",
+    "50er",
+    "60er",
+    "70er",
+    "80er",
+    "90er",
+    #"Leiter", # only if die Leiter
     "Butter",
     "Papier",
     "Scanner",
@@ -105,7 +142,7 @@ noun_lemma_endings = {
     ("er", "in"): 1, # sg ers:in, just dative: ern:innen
     ("ent", "entin"): 3, # nom sg ent:in, sonst sg alles enten:in, plural enten:innen
     ("at", "atin"): 3, # wie ent
-    ("te", "tin"): 5, # wie ent, endung einfach nur n nicht en
+    ("Experte", "Expertin"): 5, # wie ent, endung einfach nur n nicht en
     ("or", "orin"): 2, # just genitive ors:in, plural always en:innen
     ("eur", "euse"): 4, #Coiffeur
     ("eur","eurin"): 4,
@@ -249,21 +286,21 @@ def replace_virtuose(noun: spacy.tokens.Token, gender_token=":"):
     ending_fem = "in"
     if "Gender=Masc" in morph:
         if "Number=Plur" in morph:
-            noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit(f"{ending_masc}en", 1))
+            noun._.value = f"{ending_masc}n{gender_token}innen".join(text.rsplit(f"{ending_masc}n", 1))
         else:
             if "Case=Nom" in morph:
                 noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit(f"{ending_masc}", 1))
             else:
-                noun._.value = f"{ending_masc}en{gender_token}in".join(text.rsplit(f"{ending_masc}en", 1))
+                noun._.value = f"{ending_masc}en{gender_token}in".join(text.rsplit(f"{ending_masc}n", 1))
     # female nouns in in erin
     elif "Gender=Fem" in morph:
         if "Number=Plur" in morph:
-            noun._.value = f"{ending_masc}en{gender_token}innen".join(text.rsplit("innen", 1))
+            noun._.value = f"{ending_masc}n{gender_token}innen".join(text.rsplit("innen", 1))
         else:
             if "Case=Nom" in morph:
                 noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
             else:
-                noun._.value = f"{ending_masc}en{gender_token}in".join(text.rsplit("in", 1))
+                noun._.value = f"{ending_masc}n{gender_token}in".join(text.rsplit("in", 1))
 
 
 special_nouns: t.Dict[str, t.Callable] = {
@@ -277,25 +314,4 @@ special_nouns: t.Dict[str, t.Callable] = {
     "Chirurgin": replace_chirurg,
     "Virtuose": replace_virtuose,
     "Virtuosin": replace_virtuose,
-}
-
-nominalized_adjectives: t.List[str] = [
-    "Dritte",
-    "Dritter",
-    "Zweiter",
-    "Zweite",
-    "Krimineller",
-    "Kriminelle",
-    "Kranker",
-    "Kranke",
-    "Meditierende",
-    "Meditierender",
-
-
-]
-
-irregular_replacements = {
-    "jedermann": "jeder", # shall be replaced bei jeder
-    "Wunderknabe": "Wunderkind",
-
 }
