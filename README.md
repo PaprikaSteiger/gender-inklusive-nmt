@@ -25,7 +25,7 @@ python -m sockeye.train \
 --prepared-data prepared \
 --validation-source validation.fr.bpe \
 --validation-target validation_annotated.fr.bpe \
---output model \
+--output new_model \
 --num-layers 3 \
 --transformer-model-size 1024 --transformer-attention-heads 16 \
 --transformer-feed-forward-num-hidden 4096 --amp --batch-type max-word \
