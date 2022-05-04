@@ -7,6 +7,7 @@ from spacy.tokens import Doc, Span
 from spacy.tokens import Token
 from tqdm import tqdm
 
+
 from load_corpus import DIR
 from replace_functions import replace_article, replace_adjective, \
     replace_noun, get_declination_type, replace_personal_pronoun
@@ -143,8 +144,8 @@ def on_match_su_ip_dp(
     match_id, start, end = matches[i]
     entities = [t for t in Span(doc, start, end, label="EVENT")]
     # if nothing was replaced in this sentence, don't replace individual pronouns
-    # if not any(gender_token in token._.value for token in doc):
-    #     return None
+    if not any(gender_token in token._.value for token in doc):
+        return None
     # first token is the not-determiner
     pronoun = entities.pop(-1)
     if pronoun.lemma_ == "kein":
@@ -209,7 +210,15 @@ def compare_files(gold_file: Path, trial_file: Path):
     return
 
 
-def spacy_pipeline(infile: str, outfile_source: str, outfile_target: str):
+def tokenize(infile: str, outfile: str):
+    nlp = spacy.load("de_core_news_lg")
+    with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
+        for line in inn:
+            doc = nlp(line)
+            out.write(" ".join(t.text for t in doc))
+
+
+def spacy_pipeline(infile: str, outfile_target: str):
     # patterns
     # start writing rules
     # us .sent to get sentence span of matched tokens
@@ -258,7 +267,7 @@ def spacy_pipeline(infile: str, outfile_source: str, outfile_target: str):
     matcher.add("ar_ip_pp_ad_nn", [ar_ip_pp_ad_nn], on_match=on_match_ar_ip_pp_ad_nn)
     matcher.add("su_ip_dp", [su_ip_dp], on_match=on_match_su_ip_dp)
     matcher.add("rel_pro", [relpro], on_match=on_match_rel)
-    with open(infile, "r", encoding="utf8") as inn, open(outfile_target, "w", encoding="utf8") as out, open(outfile_source, "w", encoding="utf8") as out_s:
+    with open(infile, "r", encoding="utf8") as inn, open(outfile_target, "w", encoding="utf8") as out:
         for line in tqdm(inn):
             # print(line)
             for ele, replacement in pre_replacements.items():
@@ -268,7 +277,6 @@ def spacy_pipeline(infile: str, outfile_source: str, outfile_target: str):
             # irregular replacements
             # for token in doc:
             #     if token.lemma_ in irregular_replacements:
-            out_s.write(" ".join(t.text for t in doc))
             replace = True
             # check for entities referring to persons
             if doc.ents:
@@ -300,6 +308,10 @@ def spacy_pipeline(infile: str, outfile_source: str, outfile_target: str):
             # token.is_punct
             #    )
 
+
+
+
+
 if __name__ == "__main__":
     # infile = r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_de.txt"
     # outfile_source = r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data__tokenized_de2.txt"
@@ -310,8 +322,7 @@ if __name__ == "__main__":
     spacy_pipeline(
         infile=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de.txt",
         outfile_target=outfile,
-        outfile_source=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\german_annotated_inclusiv_spacy_test_blabla.txt",
-    )
+        )
     compare_files(gold_file=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.txt",
                   trial_file=outfile)
     #clean_annotated_file(infile=(DIR / "german_annotated_inclusive.txt"), outfile=(DIR / "german_annotated_inclusive_clean.txt"))
