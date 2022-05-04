@@ -2,6 +2,7 @@ import typing as t
 
 import spacy
 from spacy.tokens import Token
+from pygermanet import load_germanet
 
 from special_cases_de import \
     no_replacment, gendered_no_replacement, pre_replacements, noun_lemma_endings, \
@@ -15,30 +16,33 @@ from special_cases_de import \
 def replace_article(article: spacy.tokens.Token, gender_token=":", manual_morph: t.Optional[str]=None):
     morph = article.morph
     text = article.text
+    capital = False
+    if text[0].isupper():
+        capital = True
     manual_morph = manual_morph or ""
     if "Number=Plur" in morph:
         return None
     if "Definite=Def" in morph or "Definite=Def" in manual_morph:
         if "Case=Nom" in morph:
             if "Gender=Fem" in morph:
-                article._.value = text + f"{gender_token}der"
+                article._.value = text + f"{gender_token}{'d' if not capital else 'D'}er"
             elif "Gender=Masc" in morph:
-                article._.value = f"die{gender_token}" + text
+                article._.value = f"{'d' if not capital else 'D'}ie{gender_token}" + text
         elif "Case=Gen" in morph:
             if "Gender=Fem" in morph:
-                article._.value = text + f"{gender_token}des"
+                article._.value = text + f"{gender_token}{'d' if not capital else 'D'}es"
             elif "Gender=Masc" in morph:
-                article._.value = f"der{gender_token}" + text
+                article._.value = f"{'d' if not capital else 'D'}er{gender_token}" + text
         elif "Case=Dat" in morph:
             if "Gender=Fem" in morph:
-                article._.value = text + f"{gender_token}dem"
+                article._.value = text + f"{gender_token}{'d' if not capital else 'D'}em"
             elif "Gender=Masc" in morph:
-                article._.value = f"der{gender_token}" + text
+                article._.value = f"{'d' if not capital else 'D'}er{gender_token}" + text
         elif "Case=Acc" in morph:
             if "Gender=Fem" in morph:
-                article._.value = text + f"{gender_token}den"
+                article._.value = text + f"{gender_token}{'d' if not capital else 'D'}en"
             elif "Gender=Masc" in morph:
-                article._.value = f"die{gender_token}" + text
+                article._.value = f"{'d' if not capital else 'D'}ie{gender_token}" + text
     elif "Definite=Ind" in morph or "Definite=Ind" in manual_morph:
         if "Case=Nom" in morph:
             if "Gender=Fem" in morph:
@@ -133,7 +137,7 @@ def replace_adjective(adjective: spacy.tokens.Token, declination_type: str, gend
             elif "Gender=Masc" in morph:
                 adjective._.value = text[:-1] + f"{gender_token}n"
 
-
+# S6: unveränderter Plural
 def replace_type_1(noun: spacy.tokens.Token, ending: t.Iterable[str], gender_token=":"):
     ending_masc, ending_fem = ending
     morph = noun.morph
@@ -163,6 +167,15 @@ def replace_type_1(noun: spacy.tokens.Token, ending: t.Iterable[str], gender_tok
                 noun._.value = f"{ending_masc}{gender_token}in".join(text.rsplit("in", 1))
 
 
+gn = load_germanet()
+def check_germa_net(lemma):
+    synset = gn.synsets(lemma)
+    if synset:
+        return synset[0].gn_class == "Mensch"
+    else:
+        return False
+
+
 def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
     # TODO: the order of checking the endings matter. How to overcome this?
     # TODO: e.g. 'ender' is thus transformed to 'ender:in', but it should be 'ende'
@@ -174,28 +187,35 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
     morph = noun.morph
     lemma = noun.lemma_
     text = noun.text
+    # conditions for not changing nouns
     if lemma in gendered_no_replacement or lemma in no_replacment:
         return None
-    else:
-        for word in no_replacment:
-            if lemma.endswith(word):# or lemma.lower().endswith(word.lower()):
-                return None
+    for word in no_replacment:
+        if lemma.endswith(word):  # or lemma.lower().endswith(word.lower()):
+            return None
+    if not check_germa_net(lemma):
+        return None
+    # special cases still to handle
     if text == "Wunderknabe":
         pass
+    if lemma == "Virtuose":
+        breakpoint()
+
     if lemma in pre_replacements:
         noun._.value = pre_replacements[lemma]
         return True
-    if lemma == "Virtuose":
-        breakpoint()
+
     elif lemma in special_nouns:
         special_nouns[lemma](noun=noun, gender_token=gender_token)
         return True
+    # TODO: use nominalized adjective endings
     elif lemma in nominalized_adjectives:
         #breakpoint()
         if noun.left_edge.pos_ == "DET":
             declination_type = get_declination_type(noun.left_edge)
             replace_adjective(adjective=noun, declination_type=declination_type, gender_token=gender_token)
             return True
+    # TODO: get plural ending
     for endings, type in noun_lemma_endings.items():
         ending_masc, ending_fem = endings
         if type == 1 and lemma.endswith(f"{ending_masc}") or lemma.endswith(f"{ending_fem}"):
