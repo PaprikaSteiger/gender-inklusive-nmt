@@ -156,19 +156,19 @@ if __name__ == "__main__":
     #     spacy_model=spacy.load("de_core_news_lg")
     # )
     # files =
-    # create_train(
-    #     source_files=[
-    #     r"C:\Users\steig\Desktop\Neuer Ordner\data\ted_13_de.txt",
-    #     r"C:\Users\steig\Desktop\Neuer Ordner\data\ted_20_de.txt",
-    #     r"C:\Users\steig\Desktop\Neuer Ordner\data\europarl_de.txt",
-    # ],
-    # test_data=str(DIR / "test_set_de.txt"),
-    # out_file=r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_de.txt",
-    # )
-    create_validation_set(
-        train_data=r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_annotated_de.txt",
-        train_out=str(DIR / "train_text.de"),
-        val_out=str(DIR / "val_text.de"),
-        validation_number=3000,
+    create_train(
+        source_files=[
+        r"C:\Users\steig\Desktop\Neuer Ordner\data\ted_13_de.txt",
+        r"C:\Users\steig\Desktop\Neuer Ordner\data\ted_20_de.txt",
+        r"C:\Users\steig\Desktop\Neuer Ordner\data\europarl_de.txt",
+    ],
+    test_data=str(DIR / "test_set_de.txt"),
+    out_file=r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_de.txt",
     )
+    # create_validation_set(
+    #     train_data=r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_annotated_de.txt",
+    #     train_out=str(DIR / "train_text.de"),
+    #     val_out=str(DIR / "val_text.de"),
+    #     validation_number=3000,
+    # )
 
