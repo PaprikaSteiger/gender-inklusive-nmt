@@ -51,8 +51,14 @@ gendered_no_replacement = [
     "Mann",
     "Herr",
     "Frau",
+    "Mutter",
+    "Vater",
     "Tochter",
-    "Sohn"
+    "Sohn",
+    "Bruder",
+    "Schwester",
+    "Dame",
+
 ]
 # tokens where gender inclusive shall not be used
 no_replacment = [
@@ -60,6 +66,8 @@ no_replacment = [
     "Vater",
     "Tochter",
     "Sohn",
+    "Bruder",
+    "Schwester",
     "Computer",
     "Roboter",
     "Eimer", #And komposita
@@ -142,7 +150,7 @@ noun_lemma_endings = {
     ("er", "in"): 1, # sg ers:in, just dative: ern:innen
     ("ent", "entin"): 3, # nom sg ent:in, sonst sg alles enten:in, plural enten:innen
     ("at", "atin"): 3, # wie ent
-    ("Experte", "Expertin"): 5, # wie ent, endung einfach nur n nicht en
+    ("experte", "expertin"): 5, # wie ent, endung einfach nur n nicht en
     ("or", "orin"): 2, # just genitive ors:in, plural always en:innen
     ("eur", "euse"): 4, #Coiffeur
     ("eur","eurin"): 4,
