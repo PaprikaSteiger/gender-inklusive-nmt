@@ -12,6 +12,7 @@ from load_corpus import DIR
 from replace_functions import replace_article, replace_adjective, \
     replace_noun, get_declination_type, replace_personal_pronoun
 from special_cases_de import gendered_no_replacement, noun_lemma_endings, pre_replacements
+from util import clean_annotated_file, compare_files, tokenize
 
 # list of all pos tags, dependencies etc
 # https://github.com/explosion/spaCy/blob/master/spacy/glossary.py
@@ -144,8 +145,8 @@ def on_match_su_ip_dp(
     match_id, start, end = matches[i]
     entities = [t for t in Span(doc, start, end, label="EVENT")]
     # if nothing was replaced in this sentence, don't replace individual pronouns
-    if not any(gender_token in token._.value for token in doc):
-        return None
+    # if not any(gender_token in token._.value for token in doc):
+    #     return None
     # first token is the not-determiner
     pronoun = entities.pop(-1)
     if pronoun.lemma_ == "kein":
@@ -189,33 +190,6 @@ def on_match_rel(
     ref = rel.head.head
     if gender_token in ref._.value:
         replace_article(rel, gender_token=gender_token, manual_morph="Definite=Def")
-
-
-def clean_annotated_file(infile: Path, outfile: Path):
-    with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
-        for line in inn:
-            line = line.split()
-            line = " ".join(line[2:])
-            out.write(line + "\n")
-
-
-def compare_files(gold_file: Path, trial_file: Path):
-    differences = []
-    with open(gold_file, "r", encoding="utf8") as gold, open(trial_file, "r", encoding="utf8") as trial, open((DIR / "differences.txt"), "w", encoding="utf8") as out:
-        for gold_line, trial_line in zip(gold, trial):
-            if not gold_line.replace(" ", "") == trial_line.replace(" ", ""):
-                differences.append(trial_line)
-        for d in differences:
-            out.write(d)
-    return
-
-
-def tokenize(infile: str, outfile: str):
-    nlp = spacy.load("de_core_news_lg")
-    with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
-        for line in inn:
-            doc = nlp(line)
-            out.write(" ".join(t.text for t in doc))
 
 
 def spacy_pipeline(infile: str, outfile_target: str):
@@ -318,7 +292,7 @@ if __name__ == "__main__":
     # outfile = r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_annotated_de2.txt"
     # spacy_pipeline(infile=infile, outfile_target=outfile, outfile_source=outfile_source)
 
-    outfile = r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\german_annotated_inclusiv_spacy_test.txt"
+    outfile = r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\german_annotated_inclusiv_spacy_test_old.txt"
     spacy_pipeline(
         infile=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de.txt",
         outfile_target=outfile,

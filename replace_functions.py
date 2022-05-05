@@ -169,11 +169,12 @@ def replace_type_1(noun: spacy.tokens.Token, ending: t.Iterable[str], gender_tok
 
 gn = load_germanet()
 def check_germa_net(lemma):
-    synset = gn.synsets(lemma)
-    if synset:
-        return synset[0].gn_class == "Mensch"
-    else:
-        return False
+    # synset = gn.synsets(lemma)
+    # if synset:
+    #     return synset[0].gn_class == "Mensch"
+    # else:
+    #     return False
+    return True
 
 
 def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
@@ -199,7 +200,7 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
     if text == "Wunderknabe":
         pass
     if lemma == "Virtuose":
-        breakpoint()
+        #breakpoint()
 
     if lemma in pre_replacements:
         noun._.value = pre_replacements[lemma]
