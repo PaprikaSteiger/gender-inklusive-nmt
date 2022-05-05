@@ -87,7 +87,7 @@ def tokenize(infile: str, outfile: str, spacy_model: str = "de_core_news_lg"):
 if __name__ == "__main__":
     evaluate(
         gold_file=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.tokenized",
-        test_file=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\german_annotated_inclusiv_spacy_test_new.txt"
+        test_file=r"C:\Users\steig\Desktop\Neuer Ordner\data\test_translated_old.txt"
     )
     # with open(
     #         r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.tokenized",

@@ -201,6 +201,7 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
         pass
     if lemma == "Virtuose":
         #breakpoint()
+        pass
 
     if lemma in pre_replacements:
         noun._.value = pre_replacements[lemma]
