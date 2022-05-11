@@ -32,14 +32,19 @@ def select_sentences(n: int, file: str):
     for i in indices_set:
         yield clean_lines[i]
 
-def create_validation_set(train_data: str,
-                          train_out: str,
-                          val_out: str):
+def create_validation_set(train_data1: str,
+                          train_data2: str,
+                          train_out1: str,
+                          train_out2: str,
+                          val_out1: str,
+                          val_out2: str
+                          ):
     split = 0.1
-    split_index = floor(len(train_data) * split)
-    train = train_data[:split_index]
-    validation = train_data[split_index:]
-    lines = open(train_data, "r", encoding="utf8").readlines()
+    #split_index = floor(len(train_data) * split)
+    #train = train_data[:split_index]
+    #validation = train_data[split_index:]
+    lines = open(train_data1, "r", encoding="utf8").readlines()
+    lines2 = open(train_data2, "r", encoding="utf8").readlines()
     length = len(lines)
     # generate n random integers in range (0, length)
     n = floor(length * split)
@@ -49,22 +54,28 @@ def create_validation_set(train_data: str,
         new_int = np.random.randint(0, length)
         if new_int not in indices_set:
             indices_set.add(new_int)
-    with open(train_out, "w", encoding="utf8") as train:
+    with open(train_out1, "w", encoding="utf8") as train1, open(train_out2, "w", encoding="utf8") as train2:
         for i, line in enumerate(lines, start=0):
             if i in indices_set:
                 continue
             else:
-                train.write(line)
-    with open(val_out, "w", encoding="utf8") as val:
+                train1.write(line)
+                train2.write(lines2[i])
+    with open(val_out1, "w", encoding="utf8") as val1, open(val_out2, "w", encoding="utf8") as val2:
         for i in indices_set:
-            val.write(lines[i])
-    return train, validation
+            val1.write(lines[i])
+            val2.write(lines2[i])
+    #return train, validation
 
 if __name__ == "__main__":
     create_validation_set(
-        train_data=str(DIR/"fr_train.txt"),
-        train_out=str(DIR/"train.fr"),
-        val_out=str(DIR/"validation.fr"))
+        train_data1=str(r"C:\Users\steig\Desktop\Neuer Ordner\train_data2.de.BPE.annotated"),
+        train_out1=str(r"C:\Users\steig\Desktop\Neuer Ordner\train_data2.prepared.de.BPE.annotated"),
+        val_out1=str(r"C:\Users\steig\Desktop\Neuer Ordner\validation2.de.BPE.annotated"),
+        train_data2=r"C:\Users\steig\Desktop\Neuer Ordner\train_data.BPE.plain",
+        train_out2=r"C:\Users\steig\Desktop\Neuer Ordner\train2.de.BPE",
+        val_out2=r"C:\Users\steig\Desktop\Neuer Ordner\validation2.de.BPE",
+    )
 
 
 

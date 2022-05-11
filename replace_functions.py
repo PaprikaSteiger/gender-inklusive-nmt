@@ -169,11 +169,11 @@ def replace_type_1(noun: spacy.tokens.Token, ending: t.Iterable[str], gender_tok
 
 gn = load_germanet()
 def check_germa_net(lemma):
-    # synset = gn.synsets(lemma)
-    # if synset:
-    #     return synset[0].gn_class == "Mensch"
-    # else:
-    #     return False
+    synset = gn.synsets(lemma)
+    if synset:
+        return synset[0].gn_class == "Mensch"
+    else:
+        return False
     return True
 
 

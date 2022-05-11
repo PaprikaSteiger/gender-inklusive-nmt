@@ -7,8 +7,10 @@ from corpus_statistics import DIR
 
 gender_pattern = re.compile(r"\w:\w")
 
+
 def evaluate(gold_file: str, test_file: str):
     lines = 0
+    different_lines = 0
     false_negative = 0
     false_positive = 0
     true_negative = 0
@@ -17,14 +19,21 @@ def evaluate(gold_file: str, test_file: str):
     total_lines = 0
     total_positive = 0
     total_negative = 0
-    with open(gold_file, "r", encoding="utf8") as gold, open(test_file, "r", encoding="utf8") as test:
-        #assert len(gold.readlines()) == len(test.readlines())
-        for gline, tline in zip(gold, test):
+    with open(gold_file, "r", encoding="utf8") as goldd, open(test_file, "r", encoding="utf8") as testt:
+        for gline, tline in zip(goldd, testt):
             total_lines += 1
             if gline.replace(" ", "") == tline.replace(" ", ""):
                 lines += 1
+            gline = gline.strip("\n")
+            tline = tline.strip("\n")
             gline = gline.split(" ")
             tline = tline.split(" ")
+            if gline[-1] == "":
+                gline = gline[:-1]
+            if not len(gline) == len(tline):
+                different_lines += 0
+                print(gline)
+                print(tline)
             for gword, tword in zip(gline, tline):
                 total_words += 1
                 # is gold word gender inclusive?
@@ -44,7 +53,7 @@ def evaluate(gold_file: str, test_file: str):
                     else:
                         false_negative += 1
     print(f"""
-        correct_lines: {lines/total_lines}
+        correct_lines: {lines}
         total_lines: {total_lines}
         ---------------------------
         true_pos: {true_positive}
@@ -85,27 +94,16 @@ def tokenize(infile: str, outfile: str, spacy_model: str = "de_core_news_lg"):
 
 
 if __name__ == "__main__":
+    gold_file = r"/gender-inklusive-nmt/data/results/test_set_de_annotated.tokenized"
+    test_file = r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\results\test_translated_old.txt"
+    # with open(gold_file, "r", encoding="utf8") as gold:
+    #     breakpoint()
+    #     for line in gold:
+    #         print(line)
     evaluate(
-        gold_file=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.tokenized",
-        test_file=r"C:\Users\steig\Desktop\Neuer Ordner\data\test_translated_old.txt"
+        gold_file=gold_file,
+        test_file=test_file,
     )
-    # with open(
-    #         r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.tokenized",
-    #         "r",
-    #         encoding="utf8",) as ann, open(
-    #     r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated_dummy.txt",
-    #     "r",
-    #     encoding="utf8",
-    # ) as out:
-    #     for line1, line2 in zip(ann, out):
-    #         if not len(line1.split(" ")) == len(line2.split(" ")):
-    #             breakpoint()
-        # for line in ann:
-        #     line = line.split(" ")
-        #     for c, word in enumerate(line):
-        #         if gender_pattern.search(word):
-        #             line[c] = word.replace("à", ":")
-        #     out.write(" ".join(line))
     # tokenize(
     #     infile=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated_dummy.txt",
     #     outfile=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.tokenized"
