@@ -1,4 +1,5 @@
-rule_old_annotated.deBLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.6 99.4/98.8/98.4/97.9 (BP = 1.000 ratio = 1.000 hyp_len = 18478 ref_len = 18478)
+rule_old_annotated.de
+BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.6 99.4/98.8/98.4/97.9 (BP = 1.000 ratio = 1.000 hyp_len = 18478 ref_len = 18478)
 
         correct_lines: 919
         total_lines: 1000
@@ -13,7 +14,8 @@ rule_old_annotated.deBLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.1
         total_negative: 18268
         total_words: 18478
         
-        test_translated_old.deBLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 97.2 98.8/97.7/96.7/95.7 (BP = 1.000 ratio = 1.000 hyp_len = 18475 ref_len = 18478)
+        test_translated_old.de
+        BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 97.2 98.8/97.7/96.7/95.7 (BP = 1.000 ratio = 1.000 hyp_len = 18475 ref_len = 18478)
 
         correct_lines: 843
         total_lines: 1000
@@ -28,7 +30,8 @@ rule_old_annotated.deBLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.1
         total_negative: 18265
         total_words: 18475
         
-        rule_new_annotated.deBLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.0 99.1/98.3/97.6/96.9 (BP = 1.000 ratio = 1.000 hyp_len = 18478 ref_len = 18478)
+        rule_new_annotated.de
+        BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.0 99.1/98.3/97.6/96.9 (BP = 1.000 ratio = 1.000 hyp_len = 18478 ref_len = 18478)
 
         correct_lines: 889
         total_lines: 1000
