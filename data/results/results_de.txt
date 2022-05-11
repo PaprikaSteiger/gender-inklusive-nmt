@@ -1,0 +1,43 @@
+rule_old_annotated.de
+        correct_lines: 919
+        total_lines: 1000
+        ---------------------------
+        true_pos: 111
+        true_neg: 18252
+        false_pos: 16
+        false_neg: 87
+        wrong_ending: 12
+        _____________________________
+        total_positive: 210 vs. tp + fn + wrong_ending = 210
+        total_negative: 18268
+        total_words: 18478
+        
+        test_translated_old.de
+        correct_lines: 843
+        total_lines: 1000
+        ---------------------------
+        true_pos: 119
+        true_neg: 18133
+        false_pos: 132
+        false_neg: 66
+        wrong_ending: 25
+        _____________________________
+        total_positive: 210 vs. tp + fn + wrong_ending = 210
+        total_negative: 18265
+        total_words: 18475
+        
+        rule_new_annotated.de
+        correct_lines: 889
+        total_lines: 1000
+        ---------------------------
+        true_pos: 136
+        true_neg: 18171
+        false_pos: 97
+        false_neg: 58
+        wrong_ending: 16
+        _____________________________
+        total_positive: 210 vs. tp + fn + wrong_ending = 210
+        total_negative: 18268
+        total_words: 18478
+        
+        

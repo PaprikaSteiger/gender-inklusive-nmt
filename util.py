@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+import os
 
 import spacy
 
@@ -19,6 +20,7 @@ def evaluate(gold_file: str, test_file: str):
     total_lines = 0
     total_positive = 0
     total_negative = 0
+    wrong_ending = 0
     with open(gold_file, "r", encoding="utf8") as goldd, open(test_file, "r", encoding="utf8") as testt:
         for gline, tline in zip(goldd, testt):
             total_lines += 1
@@ -30,6 +32,8 @@ def evaluate(gold_file: str, test_file: str):
             tline = tline.split(" ")
             if gline[-1] == "":
                 gline = gline[:-1]
+            if tline[-1] == "":
+                tline = tline[:-1]
             if not len(gline) == len(tline):
                 different_lines += 0
                 print(gline)
@@ -47,12 +51,17 @@ def evaluate(gold_file: str, test_file: str):
                         true_positive += 1
                     else:
                         true_negative += 1
+                elif gender_pattern.search(gword) and gender_pattern.search(tword):
+                        wrong_ending += 1
                 else:
                     if gender_pattern.search(tword):
+                        #print(gline)
+                        #print(f"gold:-{gword}-test:{tword}-")
                         false_positive += 1
                     else:
                         false_negative += 1
-    print(f"""
+    return \
+        f"""
         correct_lines: {lines}
         total_lines: {total_lines}
         ---------------------------
@@ -60,11 +69,13 @@ def evaluate(gold_file: str, test_file: str):
         true_neg: {true_negative}
         false_pos: {false_positive}
         false_neg: {false_negative}
+        wrong_ending: {wrong_ending}
         _____________________________
-        total_positive: {total_positive}
+        total_positive: {total_positive} vs. tp + fn + wrong_ending = {true_positive + false_negative + wrong_ending}
         total_negative: {total_negative}
         total_words: {total_words}
-        """)
+        
+        """
 
 def clean_annotated_file(infile: Path, outfile: Path):
     with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
@@ -94,18 +105,23 @@ def tokenize(infile: str, outfile: str, spacy_model: str = "de_core_news_lg"):
 
 
 if __name__ == "__main__":
-    gold_file = r"/gender-inklusive-nmt/data/results/test_set_de_annotated.tokenized"
-    test_file = r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\results\test_translated_old.txt"
-    # with open(gold_file, "r", encoding="utf8") as gold:
-    #     breakpoint()
-    #     for line in gold:
-    #         print(line)
-    evaluate(
-        gold_file=gold_file,
-        test_file=test_file,
-    )
-    # tokenize(
-    #     infile=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated_dummy.txt",
-    #     outfile=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.tokenized"
-    # )
+    gold_file = str(DIR / "results" / "test_set_annotated_tokenized.de")
+    test_files = [
+        (DIR / "results" / "rule_old_annotated.de"),
+        (DIR / "results" / "test_translated_old.de"),
+        (DIR / "results" / "rule_new_annotated.de"),
+    ]
+    output = (DIR / "results" / "results_de.txt")
+    with open(output, "w", encoding="utf8") as out:
+        for file in test_files:
+            # File name
+            out.write(file.name)
+            # stream = os.popen(f"sacrebleu {str(gold_file)} -tok none -i {str(file)}")
+            # out.write(stream.read())
+            out.write(
+                evaluate(
+                gold_file=str(gold_file),
+                test_file=str(file),
+                )
+            )
 
