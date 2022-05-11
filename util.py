@@ -116,8 +116,8 @@ if __name__ == "__main__":
         for file in test_files:
             # File name
             out.write(file.name)
-            # stream = os.popen(f"sacrebleu {str(gold_file)} -tok none -i {str(file)}")
-            # out.write(stream.read())
+            stream = os.popen(f"sacrebleu {str(gold_file)} -tok none -i {str(file)}")
+            out.write(stream.read())
             out.write(
                 evaluate(
                 gold_file=str(gold_file),
