@@ -12,10 +12,11 @@ import spacy
 
 gender_pattern = re.compile(r"\w:\w")
 
-DIR: Path = (Path(__file__).parent / "data").mkdir(exist_ok=True) or Path(__file__).parent / "data"
+DIR: Path = (Path(__file__).parent / "data").mkdir(exist_ok=True) or Path(
+    __file__
+).parent / "data"
 CORPUS_NOISE = [
     r"http://",
-
 ]
 
 
@@ -31,7 +32,9 @@ def evaluate(gold_file: str, test_file: str):
     total_positive = 0
     total_negative = 0
     wrong_ending = 0
-    with open(gold_file, "r", encoding="utf8") as goldd, open(test_file, "r", encoding="utf8") as testt:
+    with open(gold_file, "r", encoding="utf8") as goldd, open(
+        test_file, "r", encoding="utf8"
+    ) as testt:
         for gline, tline in zip(goldd, testt):
             total_lines += 1
             if gline.replace(" ", "") == tline.replace(" ", ""):
@@ -62,16 +65,15 @@ def evaluate(gold_file: str, test_file: str):
                     else:
                         true_negative += 1
                 elif gender_pattern.search(gword) and gender_pattern.search(tword):
-                        wrong_ending += 1
+                    wrong_ending += 1
                 else:
                     if gender_pattern.search(tword):
-                        #print(gline)
-                        #print(f"gold:-{gword}-test:{tword}-")
+                        # print(gline)
+                        # print(f"gold:-{gword}-test:{tword}-")
                         false_positive += 1
                     else:
                         false_negative += 1
-    return \
-        f"""
+    return f"""
         correct_lines: {lines}
         total_lines: {total_lines}
         ---------------------------
@@ -97,7 +99,9 @@ def evaluate(gold_file: str, test_file: str):
 
 
 def clean_annotated_file(infile: Path, outfile: Path):
-    with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
+    with open(infile, "r", encoding="utf8") as inn, open(
+        outfile, "w", encoding="utf8"
+    ) as out:
         for line in inn:
             line = line.split()
             line = " ".join(line[2:])
@@ -106,9 +110,13 @@ def clean_annotated_file(infile: Path, outfile: Path):
 
 def compare_files(gold_file: Path, trial_file: Path):
     differences = []
-    with open(gold_file, "r", encoding="utf8") as gold, open(trial_file, "r", encoding="utf8") as trial, open((DIR / "differences_translated.txt"), "w", encoding="utf8") as out:
+    with open(gold_file, "r", encoding="utf8") as gold, open(
+        trial_file, "r", encoding="utf8"
+    ) as trial, open((DIR / "differences_translated.txt"), "w", encoding="utf8") as out:
         for gold_line, trial_line in zip(gold, trial):
-            if not gold_line.replace(" ", "").replace("\n", "") == trial_line.replace(" ", "").replace("\n", ""):
+            if not gold_line.replace(" ", "").replace("\n", "") == trial_line.replace(
+                " ", ""
+            ).replace("\n", ""):
                 differences.append(trial_line)
         for d in differences:
             out.write(d)
@@ -117,19 +125,22 @@ def compare_files(gold_file: Path, trial_file: Path):
 
 def tokenize(infile: str, outfile: str, spacy_model: str = "de_core_news_lg"):
     nlp = spacy.load(spacy_model)
-    with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
+    with open(infile, "r", encoding="utf8") as inn, open(
+        outfile, "w", encoding="utf8"
+    ) as out:
         for line in inn:
             doc = nlp(line)
             out.write(" ".join(t.text for t in doc))
 
 
-def create_validation_set(train_data1: str,
-                          train_data2: str,
-                          train_out1: str,
-                          train_out2: str,
-                          val_out1: str,
-                          val_out2: str
-                          ):
+def create_validation_set(
+    train_data1: str,
+    train_data2: str,
+    train_out1: str,
+    train_out2: str,
+    val_out1: str,
+    val_out2: str,
+):
     split = 0.1
     lines = open(train_data1, "r", encoding="utf8").readlines()
     lines2 = open(train_data2, "r", encoding="utf8").readlines()
@@ -142,14 +153,18 @@ def create_validation_set(train_data1: str,
         new_int = np.random.randint(0, length)
         if new_int not in indices_set:
             indices_set.add(new_int)
-    with open(train_out1, "w", encoding="utf8") as train1, open(train_out2, "w", encoding="utf8") as train2:
+    with open(train_out1, "w", encoding="utf8") as train1, open(
+        train_out2, "w", encoding="utf8"
+    ) as train2:
         for i, line in enumerate(lines, start=0):
             if i in indices_set:
                 continue
             else:
                 train1.write(line)
                 train2.write(lines2[i])
-    with open(val_out1, "w", encoding="utf8") as val1, open(val_out2, "w", encoding="utf8") as val2:
+    with open(val_out1, "w", encoding="utf8") as val1, open(
+        val_out2, "w", encoding="utf8"
+    ) as val2:
         for i in indices_set:
             val1.write(lines[i])
             val2.write(lines2[i])
@@ -205,7 +220,9 @@ def spacy_statistics_of_test_set(test_set: str, spacy_model: Language):
             for t in doc:
                 pos[str(t.pos_)] += 1
                 if "Person" in str(t.morph) and "Pron" in str(t.morph):
-                    match = re.match(r".+\|(Person.+?\|Pron.+?)(:?\|.+|$)", str(t.morph)).group(1)
+                    match = re.match(
+                        r".+\|(Person.+?\|Pron.+?)(:?\|.+|$)", str(t.morph)
+                    ).group(1)
                     morph[match] += 1
                 else:
                     morph["NoPron"] += 1
@@ -229,11 +246,7 @@ def spacy_statistics_of_test_set(test_set: str, spacy_model: Language):
     return pos, morph, length
 
 
-def create_train(
-        source_files: t.List[str],
-        test_data: str,
-        out_file: str
-):
+def create_train(source_files: t.List[str], test_data: str, out_file: str):
     count = 0
     test_lines = open(test_data, "r", encoding="utf8").readlines()
     with open(out_file, "w", encoding="utf8") as outt:
@@ -260,10 +273,9 @@ if __name__ == "__main__":
         (DIR / "results" / "rule_old_annotated.de"),
         (DIR / "results" / "test_translated_old.de"),
         (DIR / "results" / "rule_new_annotated.de"),
-        (DIR / "german_annotated_inclusiv_spacy_test3.txt")
-
+        (DIR / "german_annotated_inclusiv_spacy_test3.txt"),
     ]
-    output = (DIR / "results" / "results_de2.txt")
+    output = DIR / "results" / "results_de2.txt"
     with open(output, "w", encoding="utf8") as out:
         for file in test_files:
             # File name
@@ -274,12 +286,11 @@ if __name__ == "__main__":
             out.write(stream.read())
             out.write(
                 evaluate(
-                gold_file=str(gold_file),
-                test_file=str(file),
+                    gold_file=str(gold_file),
+                    test_file=str(file),
                 )
             )
     compare_files(
         gold_file=str(DIR / "results" / "test_set_annotated_tokenized.de"),
-        trial_file=str(DIR / "results" / "test_translated_old.de")
+        trial_file=str(DIR / "results" / "test_translated_old.de"),
     )
-

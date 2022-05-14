@@ -9,9 +9,18 @@ from tqdm import tqdm
 
 
 from load_corpus import DIR
-from replace_functions import replace_article, replace_adjective, \
-    replace_noun, get_declination_type, replace_personal_pronoun
-from special_cases_de import gendered_no_replacement, noun_lemma_endings, pre_replacements
+from replace_functions import (
+    replace_article,
+    replace_adjective,
+    replace_noun,
+    get_declination_type,
+    replace_personal_pronoun,
+)
+from special_cases_de import (
+    gendered_no_replacement,
+    noun_lemma_endings,
+    pre_replacements,
+)
 from util import clean_annotated_file, compare_files, tokenize, DIR
 
 # list of all pos tags, dependencies etc
@@ -26,7 +35,7 @@ from util import clean_annotated_file, compare_files, tokenize, DIR
 #                 token.tag_ # fine grained pos tags
 #                 token.dep_ # dependency tag
 #                 token.is_punct # if punctuation or not
-#By default, the matcher will only return the matches and not do anything else,
+# By default, the matcher will only return the matches and not do anything else,
 # like merge entities or assign labels.
 # This is all up to you and can be defined individually
 # for each pattern, by passing in a callback function as the on_match argument on
@@ -40,15 +49,15 @@ Token.set_extension("value", default="")
 
 
 def on_match_ar_ip_pp_ad_nn(
-        matcher: spacy.matcher.Matcher,
-        doc: spacy.tokens.Doc,
-        i: int,
-        matches: t.List[t.Tuple],
-        gender_token: str=":",
+    matcher: spacy.matcher.Matcher,
+    doc: spacy.tokens.Doc,
+    i: int,
+    matches: t.List[t.Tuple],
+    gender_token: str = ":",
 ) -> None:
     # get the matched tokens
     match_id, start, end = matches[i]
-    #breakpoint()
+    # breakpoint()
     entities = [t for t in Span(doc, start, end, label="EVENT")]
     noun = entities.pop(-1)
     # only noun
@@ -78,15 +87,31 @@ def on_match_ar_ip_pp_ad_nn(
             if pronoun:
                 if pronoun.lemma_ == "kein":
                     # kein identical with indefinite article
-                    replace_article(article=pronoun, gender_token=gender_token, manual_morph="Definite=Ind")
+                    replace_article(
+                        article=pronoun,
+                        gender_token=gender_token,
+                        manual_morph="Definite=Ind",
+                    )
                 else:
-                    replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
+                    replace_adjective(
+                        adjective=pronoun,
+                        declination_type="strong",
+                        gender_token=gender_token,
+                    )
             if pronoun2:
                 if pronoun.lemma_ == "kein":
                     # kein identical with indefinite article
-                    replace_article(article=pronoun, gender_token=gender_token, manual_morph="Definite=Ind")
+                    replace_article(
+                        article=pronoun,
+                        gender_token=gender_token,
+                        manual_morph="Definite=Ind",
+                    )
                 else:
-                    replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
+                    replace_adjective(
+                        adjective=pronoun,
+                        declination_type="strong",
+                        gender_token=gender_token,
+                    )
     else:
         if replace_noun(noun=noun, gender_token=gender_token):
             declination_type = ""
@@ -99,27 +124,47 @@ def on_match_ar_ip_pp_ad_nn(
                     declination_type = get_declination_type(determiner=pronoun)
                 if pronoun.lemma_ == "kein":
                     # kein identical with indefinite article
-                    replace_article(article=pronoun, gender_token=gender_token, manual_morph="Definite=Ind")
+                    replace_article(
+                        article=pronoun,
+                        gender_token=gender_token,
+                        manual_morph="Definite=Ind",
+                    )
                 else:
-                    replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
+                    replace_adjective(
+                        adjective=pronoun,
+                        declination_type="strong",
+                        gender_token=gender_token,
+                    )
             elif pronoun2:
                 if not declination_type:
                     declination_type = get_declination_type(determiner=pronoun2)
                 if pronoun.lemma_ == "kein":
                     # kein identical with indefinite article
-                    replace_article(article=pronoun, gender_token=gender_token, manual_morph="Definite=Ind")
+                    replace_article(
+                        article=pronoun,
+                        gender_token=gender_token,
+                        manual_morph="Definite=Ind",
+                    )
                 else:
-                    replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
+                    replace_adjective(
+                        adjective=pronoun,
+                        declination_type="strong",
+                        gender_token=gender_token,
+                    )
             for adjective in adjectives:
-                replace_adjective(adjective=adjective, declination_type=declination_type, gender_token=gender_token)
+                replace_adjective(
+                    adjective=adjective,
+                    declination_type=declination_type,
+                    gender_token=gender_token,
+                )
 
 
 def on_match_pp(
-        matcher: spacy.matcher.Matcher,
-        doc: spacy.tokens.Doc,
-        i: int,
-        matches: t.List[t.Tuple],
-        gender_token: str = ":",
+    matcher: spacy.matcher.Matcher,
+    doc: spacy.tokens.Doc,
+    i: int,
+    matches: t.List[t.Tuple],
+    gender_token: str = ":",
 ) -> None:
     # simmple approach, if there is a named entity in the doc, don't change anything
     # TODO: more sophisticated approach for entity resolution
@@ -133,13 +178,12 @@ def on_match_pp(
     replace_personal_pronoun(pronoun=pronoun, gender_token=gender_token)
 
 
-
 def on_match_su_ip_dp(
     matcher: spacy.matcher.Matcher,
     doc: spacy.tokens.Doc,
     i: int,
     matches: t.List[t.Tuple],
-    gender_token: str=":",
+    gender_token: str = ":",
 ):
     # get the matched tokens
     match_id, start, end = matches[i]
@@ -151,11 +195,15 @@ def on_match_su_ip_dp(
     pronoun = entities.pop(-1)
     if pronoun.lemma_ == "kein":
         # kein identical with indefinite article
-        replace_article(article=pronoun, gender_token=gender_token, manual_morph="Definite=Ind")
+        replace_article(
+            article=pronoun, gender_token=gender_token, manual_morph="Definite=Ind"
+        )
     elif pronoun.lemma_ == "der":
         replace_article(article=pronoun, gender_token=gender_token)
     else:
-        replace_adjective(adjective=pronoun, declination_type="strong", gender_token=gender_token)
+        replace_adjective(
+            adjective=pronoun, declination_type="strong", gender_token=gender_token
+        )
     if entities:
         art = entities.pop(0)
         replace_article(article=art, gender_token=gender_token)
@@ -210,14 +258,11 @@ def spacy_pipeline(infile: str, outfile_target: str):
         {"IS_PUNCT": True, "OP": "?"},
         {"POS": "ADV", "OP": "*"},
         {"TAG": "ADJA", "OP": "*"},
-        {"POS": "NOUN"}
+        {"POS": "NOUN"},
     ]
 
     # substitution indefinite or demonstrative pronoun:
-    su_ip_dp = [
-        {"TAG": "ART", "OP": "?"},
-        {"TAG": {"IN": ["PDS", "PIS"]}}
-    ]
+    su_ip_dp = [{"TAG": "ART", "OP": "?"}, {"TAG": {"IN": ["PDS", "PIS"]}}]
 
     relpro = [
         {"TAG": {"IN": ["PRELAT", "PRELS"]}},
@@ -241,7 +286,9 @@ def spacy_pipeline(infile: str, outfile_target: str):
     matcher.add("ar_ip_pp_ad_nn", [ar_ip_pp_ad_nn], on_match=on_match_ar_ip_pp_ad_nn)
     matcher.add("su_ip_dp", [su_ip_dp], on_match=on_match_su_ip_dp)
     matcher.add("rel_pro", [relpro], on_match=on_match_rel)
-    with open(infile, "r", encoding="utf8") as inn, open(outfile_target, "w", encoding="utf8") as out:
+    with open(infile, "r", encoding="utf8") as inn, open(
+        outfile_target, "w", encoding="utf8"
+    ) as out:
         for line in tqdm(inn):
             # print(line)
             for ele, replacement in pre_replacements.items():
@@ -254,7 +301,7 @@ def spacy_pipeline(infile: str, outfile_target: str):
             replace = True
             # check for entities referring to persons
             if doc.ents:
-                if 'PER' in [t.ent_type_ for t in doc]:
+                if "PER" in [t.ent_type_ for t in doc]:
                     replace = False
             # check for tokens inhibiting replacements
             for lemma in [t.lemma_ for t in doc]:
@@ -283,9 +330,6 @@ def spacy_pipeline(infile: str, outfile_target: str):
             #    )
 
 
-
-
-
 if __name__ == "__main__":
     # infile = r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_de.txt"
     # outfile_source = r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data__tokenized_de2.txt"
@@ -296,7 +340,9 @@ if __name__ == "__main__":
     spacy_pipeline(
         infile=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de.txt",
         outfile_target=outfile,
-        )
-    compare_files(gold_file=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.txt",
-                  trial_file=outfile)
-    #clean_annotated_file(infile=(DIR / "german_annotated_inclusive.txt"), outfile=(DIR / "german_annotated_inclusive_clean.txt"))
+    )
+    compare_files(
+        gold_file=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de_annotated.txt",
+        trial_file=outfile,
+    )
+    # clean_annotated_file(infile=(DIR / "german_annotated_inclusive.txt"), outfile=(DIR / "german_annotated_inclusive_clean.txt"))
