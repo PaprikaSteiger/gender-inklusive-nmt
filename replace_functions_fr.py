@@ -1,10 +1,8 @@
-import typing as t
-
 import spacy
-from spacy.tokens import Token
+
 
 # Pronoun
-def replace_pron(pron: spacy.tokens.Token, gender_token="·"):
+def replace_pron(pron: spacy.tokens.Token, gender_token: str = "·"):
     morph = pron.morph
     text = pron.text
     # Pron personnels
@@ -48,7 +46,7 @@ def replace_pron(pron: spacy.tokens.Token, gender_token="·"):
 
 
 # Noun
-def replace_noun(noun: spacy.tokens.Token, gender_token="·"):
+def replace_noun(noun: spacy.tokens.Token, gender_token: str = "·"):
     morph = noun.morph
     text = noun.text
     lemma = noun.lemma_
@@ -436,7 +434,7 @@ def replace_noun(noun: spacy.tokens.Token, gender_token="·"):
 
 
 # Article Definite et Indéfinite
-def replace_det(det: spacy.tokens.Token, gender_token="·"):
+def replace_det(det: spacy.tokens.Token, gender_token: str = "·"):
     morph = det.morph
     text = det.text
     lemma = det.lemma_
@@ -505,12 +503,8 @@ def replace_det(det: spacy.tokens.Token, gender_token="·"):
                 det._.value = text[:-1] + f"{gender_token}e{gender_token}s"
 
 
-# TODO: review adjective suffix and think about the way to match mas-fem adjectives
-# adding ou/olle and others adjective suffix
-# same adjective suffix has different forms of mas/fem adjective suffix
-
 # Adjective
-def replace_adj(adj: spacy.tokens.Token, gender_token="·"):
+def replace_adj(adj: spacy.tokens.Token, gender_token: str = "·"):
     morph = adj.morph
     text = adj.text
     lemma = adj.lemma_
@@ -869,6 +863,4 @@ def replace_adj(adj: spacy.tokens.Token, gender_token="·"):
                     )
 
 
-# TODO: review adjctive suffix and think about the way to match mas-fem nouns and adjectives
-# adding ou/olle and others adjective suffix
-# same adjective suffix has different forms of mas/fem adjective suffix
+

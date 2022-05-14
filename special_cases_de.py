@@ -70,7 +70,7 @@ no_replacment = [
     "Völker",  # shouldn't happen anyway as the lemma is volk
     "Fehler",
     "Hunger",
-    "20er",  # TODO: in general numbers+er
+    "20er",  #in general numbers+er
     "30er",
     "40er",
     "50er",
@@ -85,10 +85,6 @@ no_replacment = [
     "Fieber",
     "Gelächter",
     "Acker",
-    # "Wikinger", TODO: ask an expert? For me it's referring to a population/culture not just the male ones
-    # "Bürger", TODO: ask an expert?
-    # "Boomer", TODO: ask an expert?
-    # "Barde", TODO: ask an expert?
     "Meter",
     "Quadratmeter",
     "Kubikmeter",
@@ -143,21 +139,7 @@ noun_lemma_endings = {
     ("tekt", "tektin"): 3,  # wie ent
     # ("ender", "enderin"): 1, # wie (t)or
     # "se", "sin" # Virtuose, are there other words with ending e - in?
-    # TODO: what to do with ein KriminelleR, but der KriminellE, it follows the strong, mixed, weak declination pattern
-    # TODO: adjectives/pronouns used as noun follow adjective declination e.g. Kriminelle / Dritte vs. ein KriminellEr
-    # TODO: for all adjectives used as noun, e.g. also ein ErwachseneR der Erwachsene
 }
-
-
-# der freund die freundin
-# den freund die freundin
-# dem freund der freundin
-# des freundes der freundin
-#
-# die freunde die freundinnen
-# die freunde die freundinnen
-# den freunden den freundinnen
-# der freunde der freundinnen
 
 
 def replace_freund(noun: spacy.tokens.Token, gender_token=":"):
@@ -206,8 +188,6 @@ def replace_freund(noun: spacy.tokens.Token, gender_token=":"):
                 )
 
 
-# ein Dritter, eine Dritte
-# einen Dritten, eine Dritte
 def replace_arzt(noun: spacy.tokens.Token, gender_token=":"):
     morph = noun.morph
     text = noun.text

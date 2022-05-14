@@ -240,7 +240,6 @@ def on_match_pron(
     gender_token: str = "·",
 ) -> None:
     # simple approach, if there is a named entity in the doc, don't change anything
-    # TODO: more sophisticated approach for entity resolution
     if bool(doc.ents):
         return None
     # get the matched tokens

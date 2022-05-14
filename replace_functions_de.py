@@ -1,7 +1,6 @@
 import typing as t
 
 import spacy
-from spacy.tokens import Token
 from pygermanet import load_germanet
 
 from special_cases_de import (
@@ -20,7 +19,7 @@ from special_cases_de import (
 
 # Artikel
 def replace_article(
-    article: spacy.tokens.Token, gender_token=":", manual_morph: t.Optional[str] = None
+    article: spacy.tokens.Token, gender_token: str =":", manual_morph: t.Optional[str] = None
 ):
     morph = article.morph
     text = article.text
@@ -95,7 +94,6 @@ def replace_article(
 # mixed if ["ein", "kein", "mein", "dein", "sein"]
 #
 def get_declination_type(determiner: spacy.tokens.Token):
-    # TODO do for other than Art:
     tag = determiner.tag_
     morph = determiner.morph
     if tag == "ART":
@@ -121,10 +119,6 @@ def get_declination_type(determiner: spacy.tokens.Token):
         return "strong"
 
 
-# TODO: checke this special adjective endings:
-# Adjektive auf -el, -er, -en
-# Bei Adjektiven, die auf -el, -er oder -en enden, fällt, wenn sie mit einem vokalisch endenden Suffix kombiniert werden, zuweilen ein unbetontes e weg (e-Tilgung):[38]
-# dunkel → ein dunkler Wald; illuster → eine illustre Gesellschaft; zerbrochen → ein zerbroch(e)ner Krug (Einzelheiten siehe im Artikel Kontraktion)
 def replace_adjective(
     adjective: spacy.tokens.Token, declination_type: str, gender_token=":"
 ):
@@ -236,10 +230,6 @@ def check_germa_net(lemma):
 
 
 def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
-    # TODO: the order of checking the endings matter. How to overcome this?
-    # TODO: e.g. 'ender' is thus transformed to 'ender:in', but it should be 'ende'
-    # TODO: maybe order endings by length and make a loop to match, then use another dict that returns the replacement function for the given ending
-    # TODO: maybe implement a class, that can do this?
     # check the ending
     # er
     # nouns in er / erin
@@ -268,7 +258,6 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
     elif lemma in special_nouns:
         special_nouns[lemma](noun=noun, gender_token=gender_token)
         return True
-    # TODO: use nominalized adjective endings
     elif lemma in nominalized_adjectives:
         # breakpoint()
         if noun.left_edge.pos_ == "DET":
@@ -279,7 +268,6 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
                 gender_token=gender_token,
             )
             return True
-    # TODO: get plural ending
     for endings, type in noun_lemma_endings.items():
         ending_masc, ending_fem = endings
         if (

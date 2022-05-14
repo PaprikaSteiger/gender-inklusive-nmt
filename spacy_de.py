@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 
 from load_corpus import DIR
-from replace_functions import (
+from replace_functions_de import (
     replace_article,
     replace_adjective,
     replace_noun,
@@ -167,7 +167,6 @@ def on_match_pp(
     gender_token: str = ":",
 ) -> None:
     # simmple approach, if there is a named entity in the doc, don't change anything
-    # TODO: more sophisticated approach for entity resolution
     if bool(doc.ents):
         return None
     # get the matched tokens
@@ -248,7 +247,6 @@ def spacy_pipeline(infile: str, outfile_target: str):
 
     # noun phrases with article modified by possibly various adjectives and adverbs
     # possible separated by a conjunction or
-    # TODO: what about adj, adj, adj (...) noun?
     # das sehr grosse, besonders grüne Haus
     ar_ip_pp_ad_nn = [
         {"TAG": "ART", "OP": "?"},
