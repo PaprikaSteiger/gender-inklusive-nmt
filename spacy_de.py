@@ -12,7 +12,7 @@ from load_corpus import DIR
 from replace_functions import replace_article, replace_adjective, \
     replace_noun, get_declination_type, replace_personal_pronoun
 from special_cases_de import gendered_no_replacement, noun_lemma_endings, pre_replacements
-from util import clean_annotated_file, compare_files, tokenize
+from util import clean_annotated_file, compare_files, tokenize, DIR
 
 # list of all pos tags, dependencies etc
 # https://github.com/explosion/spaCy/blob/master/spacy/glossary.py

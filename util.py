@@ -1,12 +1,22 @@
-import re
-from pathlib import Path
 import os
+from pathlib import Path
+import numpy as np
+import typing as t
+from collections import Counter
+import re
+from math import floor
 
+from spacy import Language
+import matplotlib.pyplot as plt
 import spacy
 
-from corpus_statistics import DIR
-
 gender_pattern = re.compile(r"\w:\w")
+
+DIR: Path = (Path(__file__).parent / "data").mkdir(exist_ok=True) or Path(__file__).parent / "data"
+CORPUS_NOISE = [
+    r"http://",
+
+]
 
 
 def evaluate(gold_file: str, test_file: str):
@@ -85,6 +95,7 @@ def evaluate(gold_file: str, test_file: str):
         negative prediction value: {true_negative/(true_negative+false_negative)*100}
         """
 
+
 def clean_annotated_file(infile: Path, outfile: Path):
     with open(infile, "r", encoding="utf8") as inn, open(outfile, "w", encoding="utf8") as out:
         for line in inn:
@@ -110,6 +121,137 @@ def tokenize(infile: str, outfile: str, spacy_model: str = "de_core_news_lg"):
         for line in inn:
             doc = nlp(line)
             out.write(" ".join(t.text for t in doc))
+
+
+def create_validation_set(train_data1: str,
+                          train_data2: str,
+                          train_out1: str,
+                          train_out2: str,
+                          val_out1: str,
+                          val_out2: str
+                          ):
+    split = 0.1
+    lines = open(train_data1, "r", encoding="utf8").readlines()
+    lines2 = open(train_data2, "r", encoding="utf8").readlines()
+    length = len(lines)
+    # generate n random integers in range (0, length)
+    n = floor(length * split)
+    indices = np.random.randint(0, length, n)
+    indices_set = set(indices)
+    while not len(indices_set) == len(indices):
+        new_int = np.random.randint(0, length)
+        if new_int not in indices_set:
+            indices_set.add(new_int)
+    with open(train_out1, "w", encoding="utf8") as train1, open(train_out2, "w", encoding="utf8") as train2:
+        for i, line in enumerate(lines, start=0):
+            if i in indices_set:
+                continue
+            else:
+                train1.write(line)
+                train2.write(lines2[i])
+    with open(val_out1, "w", encoding="utf8") as val1, open(val_out2, "w", encoding="utf8") as val2:
+        for i in indices_set:
+            val1.write(lines[i])
+            val2.write(lines2[i])
+
+
+def select_sentences(n: int, file: str):
+    clean_lines = []
+    with open(file, "r", encoding="utf8") as inn:
+        for line in inn:
+            # don't add sentences with noise to test set
+            if any(line.startswith(ele) or ele in line for ele in CORPUS_NOISE):
+                continue
+            # block sentences with less than or two tokens
+            if len(line.split(" ")) <= 2:
+                continue
+            clean_lines.append(line)
+    length = len(clean_lines)
+    # generate n random intengers in range (0, length)
+    # TODO: assert no integer appears twice
+    # TODO: or replace dupplicated sentences afterwards
+    indices = np.random.randint(0, length, n)
+    indices_set = set(indices)
+    while not len(indices_set) == len(indices):
+        breakpoint()
+        new_int = np.random.randint(0, length)
+        if new_int not in indices_set:
+            indices_set.add(new_int)
+
+    for i in indices_set:
+        yield clean_lines[i]
+
+
+def create_test_set(sources: t.List[t.Tuple[str, int]], out_file: str):
+    with open(out_file, "w", encoding="utf8") as out:
+        for file, number in sources:
+            for line in select_sentences(file=file, n=number):
+                out.write(line)
+
+
+def spacy_statistics_of_test_set(test_set: str, spacy_model: Language):
+    pos = Counter()
+    morph = Counter()
+    length = Counter()
+    gendered = Counter()
+    with open(test_set, "r", encoding="utf8") as inn:
+        for line in inn:
+            if re.search(r".*\w+:\w+.*", line):
+                gendered["Inclusive"] += 1
+            else:
+                gendered["Bias"] += 1
+            doc = spacy_model(line)
+            length[len(doc)] += 1
+            for t in doc:
+                pos[str(t.pos_)] += 1
+                if "Person" in str(t.morph) and "Pron" in str(t.morph):
+                    match = re.match(r".+\|(Person.+?\|Pron.+?)(:?\|.+|$)", str(t.morph)).group(1)
+                    morph[match] += 1
+                else:
+                    morph["NoPron"] += 1
+
+    plt.bar(x=length.keys(), height=length.values())
+    plt.xticks(ticks=range(len(length.keys())), labels=length.keys(), rotation=90)
+    plt.show()
+
+    plt.bar(x=pos.keys(), height=pos.values())
+    plt.xticks(ticks=range(len(pos.keys())), labels=pos.keys(), rotation=90)
+    plt.show()
+
+    plt.bar(x=gendered.keys(), height=gendered.values())
+    plt.xticks(ticks=range(len(gendered.keys())), labels=gendered.keys(), rotation=90)
+    plt.show()
+
+    plt.bar(x=morph.keys(), height=morph.values())
+    plt.xticks(ticks=range(len(morph.keys())), labels=morph.keys(), rotation=45)
+    plt.show()
+
+    return pos, morph, length
+
+
+def create_train(
+        source_files: t.List[str],
+        test_data: str,
+        out_file: str
+):
+    count = 0
+    test_lines = open(test_data, "r", encoding="utf8").readlines()
+    with open(out_file, "w", encoding="utf8") as outt:
+        for file in source_files:
+            with open(file, "r", encoding="utf8") as inn:
+                for line in inn:
+
+                    # don't add sentences with noise to test set
+                    if any(line.startswith(ele) or ele in line for ele in CORPUS_NOISE):
+                        continue
+                    # block sentences with less than or two tokens
+                    if len(line.split(" ")) <= 2:
+                        continue
+                    if line in test_lines:
+                        continue
+                    outt.write(line)
+                    count += 1
+    print(count)
 
 
 if __name__ == "__main__":
