@@ -112,7 +112,7 @@ def compare_files(gold_file: Path, trial_file: Path):
     differences = []
     with open(gold_file, "r", encoding="utf8") as gold, open(
         trial_file, "r", encoding="utf8"
-    ) as trial, open((DIR / "differences_translated.txt"), "w", encoding="utf8") as out:
+    ) as trial, open((DIR / "differences_translated_old.txt"), "w", encoding="utf8") as out:
         for gold_line, trial_line in zip(gold, trial):
             if not gold_line.replace(" ", "").replace("\n", "") == trial_line.replace(
                 " ", ""
@@ -268,14 +268,14 @@ def create_train(source_files: t.List[str], test_data: str, out_file: str):
 
 
 if __name__ == "__main__":
-    gold_file = str(DIR / "results" / "test_set_annotated_tokenized.de")
+    gold_file = str(DIR / "results_de" / "test_set_annotated_tokenized.de")
     test_files = [
-        (DIR / "results" / "rule_old_annotated.de"),
-        (DIR / "results" / "test_translated_old.de"),
-        (DIR / "results" / "rule_new_annotated.de"),
+        (DIR / "results_de" / "rule_old_annotated.de"),
+        (DIR / "results_de" / "test_translated_old.de"),
+        (DIR / "results_de" / "rule_new_annotated.de"),
         (DIR / "german_annotated_inclusiv_spacy_test3.txt"),
     ]
-    output = DIR / "results" / "results_de2.txt"
+    output = DIR / "results_de" / "results_de2.txt"
     with open(output, "w", encoding="utf8") as out:
         for file in test_files:
             # File name
@@ -291,6 +291,6 @@ if __name__ == "__main__":
                 )
             )
     compare_files(
-        gold_file=str(DIR / "results" / "test_set_annotated_tokenized.de"),
-        trial_file=str(DIR / "results" / "test_translated_old.de"),
+        gold_file=str(DIR / "results_de" / "test_set_annotated_tokenized.de"),
+        trial_file=str(DIR / "results_de" / "test_translated_old.de"),
     )
