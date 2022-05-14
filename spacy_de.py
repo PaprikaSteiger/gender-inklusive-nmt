@@ -57,7 +57,6 @@ def on_match_ar_ip_pp_ad_nn(
 ) -> None:
     # get the matched tokens
     match_id, start, end = matches[i]
-    # breakpoint()
     entities = [t for t in Span(doc, start, end, label="EVENT")]
     noun = entities.pop(-1)
     # only noun
@@ -306,26 +305,9 @@ def spacy_pipeline(infile: str, outfile_target: str):
                 if lemma in gendered_no_replacement:
                     replace = False
             if replace:
-                # print([t.lemma_ for t in doc ])
-                # print([t.pos_ for t in doc])
                 matches = matcher(doc)
-                # print(matches)
             text = " ".join(t._.value or t.text for t in doc)
-            # print(text)
             out.write(text)
-            # breakpoint()
-            # for token in doc:
-            #     print(
-            #         token.text,
-            #         token.morph,
-            # token.ent_type_,
-            # token.ent_iob_,
-            # token.lemma_,
-            # token.pos_,
-            # token.tag_,
-            # token.dep_,
-            # token.is_punct
-            #    )
 
 
 if __name__ == "__main__":

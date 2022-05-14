@@ -861,6 +861,3 @@ def replace_adj(adj: spacy.tokens.Token, gender_token: str = "·"):
                     adj._.value = f"tif{gender_token}ive{gender_token}s".join(
                         text.rsplit("tives", 1)
                     )
-
-
-

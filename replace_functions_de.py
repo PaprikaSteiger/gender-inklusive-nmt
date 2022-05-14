@@ -19,7 +19,9 @@ from special_cases_de import (
 
 # Artikel
 def replace_article(
-    article: spacy.tokens.Token, gender_token: str =":", manual_morph: t.Optional[str] = None
+    article: spacy.tokens.Token,
+    gender_token: str = ":",
+    manual_morph: t.Optional[str] = None,
 ):
     morph = article.morph
     text = article.text
@@ -244,12 +246,6 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
             return None
     if not check_germa_net(lemma):
         return None
-    # special cases still to handle
-    if text == "Wunderknabe":
-        pass
-    if lemma == "Virtuose":
-        # breakpoint()
-        pass
 
     if lemma in pre_replacements:
         noun._.value = pre_replacements[lemma]
@@ -259,7 +255,6 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
         special_nouns[lemma](noun=noun, gender_token=gender_token)
         return True
     elif lemma in nominalized_adjectives:
-        # breakpoint()
         if noun.left_edge.pos_ == "DET":
             declination_type = get_declination_type(noun.left_edge)
             replace_adjective(
@@ -432,18 +427,6 @@ def replace_noun(noun: spacy.tokens.Token, gender_token=":"):
                             text.rsplit("in", 1)
                         )
             return True
-        # nouns in te / tin
-        # elif lemma.endswith("te") or lemma.endswith("tin"):
-        #     if "Gender=Masc" in morph:
-        #         pass
-        #     if "Gender=Fem" in morph:
-        #         pass
-        # # nouns in t / tin
-        # if lemma.endswith("t") or lemma.endswith("tin"):
-        #     if "Gender=Masc" in morph:
-        #         pass
-        #     if "Gender=Fem" in morph:
-        #         pass
     return False
 
 

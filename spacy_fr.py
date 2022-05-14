@@ -4,7 +4,7 @@ from difflib import SequenceMatcher
 
 import spacy
 from spacy.matcher import Matcher
-from spacy.tokens import Doc, Span, Token
+from spacy.tokens import Span, Token
 from util import DIR
 
 from replace_functions_fr import replace_pron, replace_noun, replace_det, replace_adj

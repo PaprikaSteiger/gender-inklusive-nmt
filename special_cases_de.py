@@ -70,7 +70,7 @@ no_replacment = [
     "Völker",  # shouldn't happen anyway as the lemma is volk
     "Fehler",
     "Hunger",
-    "20er",  #in general numbers+er
+    "20er",  # in general numbers+er
     "30er",
     "40er",
     "50er",
