@@ -1,0 +1,97 @@
+rule_old_annotated.de
+
+
+        correct_lines: 890
+        total_lines: 1000
+        ---------------------------
+        true_pos: 137
+        true_neg: 18171
+        false_pos: 96
+        false_neg: 58
+        wrong_ending: 16
+        _____________________________
+        total_positive: 211 vs. tp + fn + wrong_ending = 211
+        total_negative: 18267
+        total_words: 18478
+        ________
+        lines %: 89.0
+        recall: 0.7251184834123223
+        wrong-endings: 0.10457516339869281
+        fall-out %: 0.5255378551486287
+        selectivity: 0.9947446214485137
+        miss-rate: 0.27488151658767773 
+        precision: 0.5879828326180258,
+        negative prediction value: 99.68182566240606
+        test_translated_old.de
+
+
+        correct_lines: 844
+        total_lines: 1000
+        ---------------------------
+        true_pos: 120
+        true_neg: 18133
+        false_pos: 131
+        false_neg: 66
+        wrong_ending: 25
+        _____________________________
+        total_positive: 211 vs. tp + fn + wrong_ending = 211
+        total_negative: 18264
+        total_words: 18475
+        ________
+        lines %: 84.39999999999999
+        recall: 0.6872037914691943
+        wrong-endings: 0.1724137931034483
+        fall-out %: 0.7172579938677179
+        selectivity: 0.9928274200613229
+        miss-rate: 0.3127962085308057 
+        precision: 0.47808764940239046,
+        negative prediction value: 99.63734271113798
+        rule_new_annotated.de
+
+
+        correct_lines: 920
+        total_lines: 1000
+        ---------------------------
+        true_pos: 112
+        true_neg: 18252
+        false_pos: 15
+        false_neg: 87
+        wrong_ending: 12
+        _____________________________
+        total_positive: 211 vs. tp + fn + wrong_ending = 211
+        total_negative: 18267
+        total_words: 18478
+        ________
+        lines %: 92.0
+        recall: 0.5876777251184834
+        wrong-endings: 0.0967741935483871
+        fall-out %: 0.08211528986697322
+        selectivity: 0.9991788471013303
+        miss-rate: 0.41232227488151657 
+        precision: 0.8818897637795275,
+        negative prediction value: 99.52560117781776
+        german_annotated_inclusiv_spacy_test3.txt
+
+
+        correct_lines: 908
+        total_lines: 1000
+        ---------------------------
+        true_pos: 126
+        true_neg: 18205
+        false_pos: 40
+        false_neg: 94
+        wrong_ending: 13
+        _____________________________
+        total_positive: 211 vs. tp + fn + wrong_ending = 233
+        total_negative: 18267
+        total_words: 18478
+        ________
+        lines %: 90.8
+        recall: 0.6587677725118484
+        wrong-endings: 0.09352517985611511
+        fall-out %: 0.2189741063119286
+        selectivity: 0.9966059013521651
+        miss-rate: 0.44549763033175355 
+        precision: 0.7590361445783133,
+        negative prediction value: 99.48631072736215
+        

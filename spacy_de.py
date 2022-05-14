@@ -292,7 +292,7 @@ if __name__ == "__main__":
     # outfile = r"C:\Users\steig\Desktop\Neuer Ordner\data\train_data_annotated_de2.txt"
     # spacy_pipeline(infile=infile, outfile_target=outfile, outfile_source=outfile_source)
 
-    outfile = r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\german_annotated_inclusiv_spacy_test_old.txt"
+    outfile = r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\german_annotated_inclusiv_spacy_test3.txt"
     spacy_pipeline(
         infile=r"C:\Users\steig\Desktop\Neuer Ordner\gender-inklusive-nmt\data\test_set_de.txt",
         outfile_target=outfile,

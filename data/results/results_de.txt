@@ -1,18 +1,25 @@
 rule_old_annotated.de
-BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.6 99.4/98.8/98.4/97.9 (BP = 1.000 ratio = 1.000 hyp_len = 18478 ref_len = 18478)
+       BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.0 99.1/98.3/97.6/96.9 (BP = 1.000 ratio = 1.000 hyp_len = 18478 ref_len = 18478)
 
-        correct_lines: 919
+       correct_lines: 889
         total_lines: 1000
         ---------------------------
-        true_pos: 111
-        true_neg: 18252
-        false_pos: 16
-        false_neg: 87
-        wrong_ending: 12
+        true_pos: 136
+        true_neg: 18171
+        false_pos: 97
+        false_neg: 58
+        wrong_ending: 16
         _____________________________
         total_positive: 210 vs. tp + fn + wrong_ending = 210
         total_negative: 18268
         total_words: 18478
+        ________
+        lines %: 88.9
+        recall: 0.7238095238095238
+        wrong-endings: 0.10526315789473684
+        fall-out %: 0.5309831399167944
+        selectivity: 0.994690168600832
+        miss-rate: 0.2761904761904762
         
         test_translated_old.de
         BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 97.2 98.8/97.7/96.7/95.7 (BP = 1.000 ratio = 1.000 hyp_len = 18475 ref_len = 18478)
@@ -29,21 +36,35 @@ BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.6 99.4/98.8/98
         total_positive: 210 vs. tp + fn + wrong_ending = 210
         total_negative: 18265
         total_words: 18475
+        ________
+        lines %: 84.3
+        recall: 0.6857142857142857
+        wrong-endings: 0.1736111111111111
+        fall-out %: 0.7226936764303312
+        selectivity: 0.9927730632356967
+        miss-rate: 0.3142857142857143
         
         rule_new_annotated.de
-        BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.0 99.1/98.3/97.6/96.9 (BP = 1.000 ratio = 1.000 hyp_len = 18478 ref_len = 18478)
+BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.6 99.4/98.8/98.4/97.9 (BP = 1.000 ratio = 1.000 hyp_len = 18478 ref_len = 18478)
 
-        correct_lines: 889
+        correct_lines: 919
         total_lines: 1000
         ---------------------------
-        true_pos: 136
-        true_neg: 18171
-        false_pos: 97
-        false_neg: 58
-        wrong_ending: 16
+        true_pos: 111
+        true_neg: 18252
+        false_pos: 16
+        false_neg: 87
+        wrong_ending: 12
         _____________________________
         total_positive: 210 vs. tp + fn + wrong_ending = 210
         total_negative: 18268
         total_words: 18478
+        ________
+        lines %: 91.9
+        recall: 0.5857142857142857
+        wrong-endings: 0.0975609756097561
+        fall-out %: 0.08758484782132692
+        selectivity: 0.9991241515217867
+        miss-rate: 0.4142857142857143
         
         

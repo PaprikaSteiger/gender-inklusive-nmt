@@ -36,8 +36,8 @@ def evaluate(gold_file: str, test_file: str):
                 tline = tline[:-1]
             if not len(gline) == len(tline):
                 different_lines += 0
-                print(gline)
-                print(tline)
+                # print(gline)
+                # print(tline)
             for gword, tword in zip(gline, tline):
                 total_words += 1
                 # is gold word gender inclusive?
@@ -74,7 +74,15 @@ def evaluate(gold_file: str, test_file: str):
         total_positive: {total_positive} vs. tp + fn + wrong_ending = {true_positive + false_negative + wrong_ending}
         total_negative: {total_negative}
         total_words: {total_words}
-        
+        ________
+        lines %: {lines/total_lines * 100}
+        recall: {(true_positive+wrong_ending)/total_positive}
+        wrong-endings: {wrong_ending/(true_positive+wrong_ending)}
+        fall-out %: {false_positive/total_negative * 100}
+        selectivity: {true_negative/total_negative}
+        miss-rate: {false_negative/total_positive} 
+        precision: {true_positive/(true_positive+false_positive)},
+        negative prediction value: {true_negative/(true_negative+false_negative)*100}
         """
 
 def clean_annotated_file(infile: Path, outfile: Path):
@@ -87,9 +95,9 @@ def clean_annotated_file(infile: Path, outfile: Path):
 
 def compare_files(gold_file: Path, trial_file: Path):
     differences = []
-    with open(gold_file, "r", encoding="utf8") as gold, open(trial_file, "r", encoding="utf8") as trial, open((DIR / "differences.txt"), "w", encoding="utf8") as out:
+    with open(gold_file, "r", encoding="utf8") as gold, open(trial_file, "r", encoding="utf8") as trial, open((DIR / "differences_translated.txt"), "w", encoding="utf8") as out:
         for gold_line, trial_line in zip(gold, trial):
-            if not gold_line.replace(" ", "") == trial_line.replace(" ", ""):
+            if not gold_line.replace(" ", "").replace("\n", "") == trial_line.replace(" ", "").replace("\n", ""):
                 differences.append(trial_line)
         for d in differences:
             out.write(d)
@@ -110,8 +118,10 @@ if __name__ == "__main__":
         (DIR / "results" / "rule_old_annotated.de"),
         (DIR / "results" / "test_translated_old.de"),
         (DIR / "results" / "rule_new_annotated.de"),
+        (DIR / "german_annotated_inclusiv_spacy_test3.txt")
+
     ]
-    output = (DIR / "results" / "results_de.txt")
+    output = (DIR / "results" / "results_de2.txt")
     with open(output, "w", encoding="utf8") as out:
         for file in test_files:
             # File name
@@ -126,4 +136,8 @@ if __name__ == "__main__":
                 test_file=str(file),
                 )
             )
+    compare_files(
+        gold_file=str(DIR / "results" / "test_set_annotated_tokenized.de"),
+        trial_file=str(DIR / "results" / "test_translated_old.de")
+    )
 
