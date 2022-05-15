@@ -66,5 +66,30 @@ BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 98.6 99.4/98.8/98
         fall-out %: 0.08758484782132692
         selectivity: 0.9991241515217867
         miss-rate: 0.4142857142857143
-        
+
+BLEU+case.mixed+numrefs.1+smooth.exp+tok.none+version.1.4.14 = 72.9 79.7/74.6/72.8/71.4 (BP = 0.977 ratio = 0.978 hyp_len = 18064 ref_len = 18478)
+        test_translated_new.de
+
+
+        correct_lines: 702
+        total_lines: 1000
+        ---------------------------
+        true_pos: 69
+        true_neg: 13112
+        false_pos: 35
+        false_neg: 3537
+        wrong_ending: 13
+        _____________________________
+        total_positive: 199 vs. tp + fn + wrong_ending = 3619
+        total_negative: 16567
+        total_words: 16766
+        ________
+        lines %: 70.19999999999999
+        recall: 0.4120603015075377
+        wrong-endings: 0.15853658536585366
+        fall-out %: 0.2112633548620752
+        selectivity: 0.7914528882718658
+        miss-rate: 17.77386934673367
+        precision: 0.6634615384615384,
+        negative prediction value: 78.75548080965824
         

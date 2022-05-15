@@ -48,9 +48,14 @@ def evaluate(gold_file: str, test_file: str):
             if tline[-1] == "":
                 tline = tline[:-1]
             if not len(gline) == len(tline):
-                different_lines += 0
-                # print(gline)
-                # print(tline)
+                if test_file == str(DIR / "results_de" / "test_translated_new.de"):
+                    print(gline)
+                    print(tline)
+                    print("---------------")
+                    different_lines += 1
+                else:
+                    different_lines += 1
+
             for gword, tword in zip(gline, tline):
                 total_words += 1
                 # is gold word gender inclusive?
@@ -76,6 +81,7 @@ def evaluate(gold_file: str, test_file: str):
     return f"""
         correct_lines: {lines}
         total_lines: {total_lines}
+        different_sentences: {different_lines}
         ---------------------------
         true_pos: {true_positive}
         true_neg: {true_negative}
@@ -182,9 +188,6 @@ def select_sentences(n: int, file: str):
                 continue
             clean_lines.append(line)
     length = len(clean_lines)
-    # generate n random intengers in range (0, length)
-    # TODO: assert no integer appears twice
-    # TODO: or replace dupplicated sentences afterwards
     indices = np.random.randint(0, length, n)
     indices_set = set(indices)
     while not len(indices_set) == len(indices):
@@ -273,7 +276,7 @@ if __name__ == "__main__":
         (DIR / "results_de" / "rule_old_annotated.de"),
         (DIR / "results_de" / "test_translated_old.de"),
         (DIR / "results_de" / "rule_new_annotated.de"),
-        (DIR / "german_annotated_inclusiv_spacy_test3.txt"),
+        (DIR / "results_de" / "test_translated_new.de"),
     ]
     output = DIR / "results_de" / "results_de2.txt"
     with open(output, "w", encoding="utf8") as out:

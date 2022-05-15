@@ -3,6 +3,7 @@ rule_old_annotated.de
 
         correct_lines: 890
         total_lines: 1000
+        different_sentences: 0
         ---------------------------
         true_pos: 137
         true_neg: 18171
@@ -27,6 +28,7 @@ rule_old_annotated.de
 
         correct_lines: 844
         total_lines: 1000
+        different_sentences: 1
         ---------------------------
         true_pos: 120
         true_neg: 18133
@@ -51,6 +53,7 @@ rule_old_annotated.de
 
         correct_lines: 920
         total_lines: 1000
+        different_sentences: 0
         ---------------------------
         true_pos: 112
         true_neg: 18252
@@ -70,28 +73,29 @@ rule_old_annotated.de
         miss-rate: 0.41232227488151657 
         precision: 0.8818897637795275,
         negative prediction value: 99.52560117781776
-        german_annotated_inclusiv_spacy_test3.txt
+        test_translated_new.de
 
 
-        correct_lines: 908
+        correct_lines: 702
         total_lines: 1000
+        different_sentences: 216
         ---------------------------
-        true_pos: 126
-        true_neg: 18205
-        false_pos: 40
-        false_neg: 94
+        true_pos: 69
+        true_neg: 13112
+        false_pos: 35
+        false_neg: 3537
         wrong_ending: 13
         _____________________________
-        total_positive: 211 vs. tp + fn + wrong_ending = 233
-        total_negative: 18267
-        total_words: 18478
+        total_positive: 199 vs. tp + fn + wrong_ending = 3619
+        total_negative: 16567
+        total_words: 16766
         ________
-        lines %: 90.8
-        recall: 0.6587677725118484
-        wrong-endings: 0.09352517985611511
-        fall-out %: 0.2189741063119286
-        selectivity: 0.9966059013521651
-        miss-rate: 0.44549763033175355 
-        precision: 0.7590361445783133,
-        negative prediction value: 99.48631072736215
+        lines %: 70.19999999999999
+        recall: 0.4120603015075377
+        wrong-endings: 0.15853658536585366
+        fall-out %: 0.2112633548620752
+        selectivity: 0.7914528882718658
+        miss-rate: 17.77386934673367 
+        precision: 0.6634615384615384,
+        negative prediction value: 78.75548080965824
         
