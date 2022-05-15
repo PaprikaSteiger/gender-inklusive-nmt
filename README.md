@@ -35,7 +35,7 @@ python -m sockeye.train \
 --learning-rate-scheduler-type inv-sqrt-decay --learning-rate-warmup 4000 \
 --seed 1
 ```
-## Evaluation (on working)
+## Evaluation
 After training, we rewrite the preprocessed test set.
 ```
 python -m sockeye.translate \
