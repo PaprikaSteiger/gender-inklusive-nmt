@@ -1,0 +1,105 @@
+test_spacy0.fr{
+ "name": "BLEU",
+ "score": 64.6,
+ "signature": "nrefs:1|case:mixed|eff:no|tok:none|smooth:exp|version:2.0.0",
+ "verbose_score": "78.5/68.8/60.5/53.4 (BP = 1.000 ratio = 1.097 hyp_len = 24043 ref_len = 21921)",
+ "nrefs": "1",
+ "case": "mixed",
+ "eff": "no",
+ "tok": "none",
+ "smooth": "exp",
+ "version": "2.0.0"
+}
+
+        correct_lines: 451
+        total_lines: 1000
+        ---------------------------
+        true_pos: 9
+        true_neg: 8098
+        false_pos: 990
+        false_neg: 12821
+        wrong_ending: 4
+        _____________________________
+        total_positive: 129 vs. tp + fn + wrong_ending = 12834
+        total_negative: 21793
+        total_words: 21922
+        
+        nmt1_test{
+ "name": "BLEU",
+ "score": 64.2,
+ "signature": "nrefs:1|case:mixed|eff:no|tok:none|smooth:exp|version:2.0.0",
+ "verbose_score": "78.2/68.5/60.1/52.8 (BP = 1.000 ratio = 1.099 hyp_len = 24082 ref_len = 21921)",
+ "nrefs": "1",
+ "case": "mixed",
+ "eff": "no",
+ "tok": "none",
+ "smooth": "exp",
+ "version": "2.0.0"
+}
+
+        correct_lines: 452
+        total_lines: 1000
+        ---------------------------
+        true_pos: 9
+        true_neg: 8058
+        false_pos: 1008
+        false_neg: 12844
+        wrong_ending: 3
+        _____________________________
+        total_positive: 129 vs. tp + fn + wrong_ending = 12856
+        total_negative: 21793
+        total_words: 21922
+        
+        test_spacy1.fr{
+ "name": "BLEU",
+ "score": 68.7,
+ "signature": "nrefs:1|case:mixed|eff:no|tok:none|smooth:exp|version:2.0.0",
+ "verbose_score": "80.7/72.3/65.0/58.6 (BP = 1.000 ratio = 1.097 hyp_len = 24043 ref_len = 21921)",
+ "nrefs": "1",
+ "case": "mixed",
+ "eff": "no",
+ "tok": "none",
+ "smooth": "exp",
+ "version": "2.0.0"
+}
+
+        correct_lines: 785
+        total_lines: 1000
+        ---------------------------
+        true_pos: 4
+        true_neg: 8417
+        false_pos: 422
+        false_neg: 13078
+        wrong_ending: 1
+        _____________________________
+        total_positive: 129 vs. tp + fn + wrong_ending = 13083
+        total_negative: 21793
+        total_words: 21922
+        
+        nmt2_test{
+ "name": "BLEU",
+ "score": 61.2,
+ "signature": "nrefs:1|case:mixed|eff:no|tok:none|smooth:exp|version:2.0.0",
+ "verbose_score": "76.9/65.7/56.7/48.9 (BP = 1.000 ratio = 1.097 hyp_len = 24058 ref_len = 21921)",
+ "nrefs": "1",
+ "case": "mixed",
+ "eff": "no",
+ "tok": "none",
+ "smooth": "exp",
+ "version": "2.0.0"
+}
+
+        correct_lines: 412
+        total_lines: 1000
+        ---------------------------
+        true_pos: 12
+        true_neg: 8018
+        false_pos: 1387
+        false_neg: 12495
+        wrong_ending: 9
+        _____________________________
+        total_positive: 129 vs. tp + fn + wrong_ending = 12516
+        total_negative: 21792
+        total_words: 21921
+        
+        
